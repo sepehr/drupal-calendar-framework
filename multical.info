@@ -1,0 +1,6 @@
+; $Id$
+name = "Multical"
+description = "Extension of native PHP 5.2+ DateTime class to support multiple calendars based on ExtDateTime."
+php = 5.2
+core = 6.x
+package = Multical

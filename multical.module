@@ -1,0 +1,22 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Implements necessary hooks for Multical module, plus the helper functions.
+ */
+ 
+/**
+ * Implements hook_init().
+ */
+function multical_init() {
+
+}
+
+/**
+ * Implements hook_menu().
+ */
+function multical_menu() {
+
+}
+

@@ -1,0 +1,29 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Implementation of Multical un/installation hooks.
+ */
+ 
+/**
+ * Implements hook_requirements().
+ */
+function multical_requirements() {
+
+}
+
+/**
+ * Implements hook_install().
+ */
+function multical_install() {
+
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function multical_uninstall() {
+
+}
+
