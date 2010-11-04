@@ -9,7 +9,7 @@
 /**
  * Implements hook_requirements().
  */
-function multical_requirements() {
+function multical_requirements($phase) {
 
 }
 

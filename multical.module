@@ -3,8 +3,15 @@
 
 /**
  * @file
- * Implements necessary hooks for Multical module, plus the helper functions.
+ * Implements necessary hooks for Multical module, plus API and helper functions.
  */
+
+/**
+ * Implements hook_perm().
+ */
+function multical_perm() {
+
+}
  
 /**
  * Implements hook_init().
@@ -17,6 +24,59 @@ function multical_init() {
  * Implements hook_menu().
  */
 function multical_menu() {
+
+}
+
+/**
+ * Implements hook_patch().
+ */
+function multical_patch() {
+
+}
+
+/**
+ * The heart of API, which somehow acts as a ExtDateTime procedural factory wrapper.
+ *
+ * The function as the heart of the API instantiate the proper object 
+ * corresponding to the passed calendar identifier or the default one.
+ *
+ * @param $calendar
+ *   Calendar identifier.
+ *
+ * @return
+ *   The instantiated calendar object.
+ */
+function multical($calendar = NULL) {
+
+}
+
+/**
+ * API function to provide a list of all calendars.
+ *
+ * @param $op
+ *   Requests the calendar list format.
+ */
+function multical_calendars() {
+
+}
+
+/**
+ * Helper function to collect a list of defined calendars.
+ *
+ * @return
+ *   An array of available calendars.
+ */
+function _multical_calendars_build() {
+
+}
+
+/**
+ * API function to get current default calendar.
+ *
+ * @return
+ *   An array of default calendar information.
+ */
+function multical_default_calendar() {
 
 }
 
