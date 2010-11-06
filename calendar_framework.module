@@ -50,6 +50,20 @@ function calendar_framework_menu() {
 }
 
 /**
+ * Calendar menu title callback.
+ *
+ * @param $identifier
+ *   Calendar identifier.
+ *
+ * @return
+ *   Calendar menu title.
+ */
+function calendar_framework_calendar_title($identifier) {
+  $calendar = calendar_framework_calendars('name', $identifier);
+  return sprintf('%s Calendar', $calendar);
+}
+
+/**
  * Implements hook_patch().
  *
  * @see http://drupal.org/project/patchdoq
