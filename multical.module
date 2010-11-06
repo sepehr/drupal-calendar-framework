@@ -113,6 +113,6 @@ function _multical_calendars_build() {
  *   An array of default calendar information.
  */
 function multical_default_calendar() {
-
+  return multical_calendars('calendar', variable_get('multical_default_calendar', ''));
 }
 
