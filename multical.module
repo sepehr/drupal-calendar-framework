@@ -67,7 +67,15 @@ function multical_calendars() {
  *   An array of available calendars.
  */
 function _multical_calendars_build() {
-
+  $calendars = array();
+  
+  $calendars_defined = module_invoke_all('calendar_info');
+  foreach ($calendars_defined as $identifier => $info) {
+    $info['config'] = variable_get('multical_' . $identifier . '_settings');
+    $calendars[$identifier] = $info;
+  }
+  
+  return $calendars;
 }
 
 /**
