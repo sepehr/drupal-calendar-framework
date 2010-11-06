@@ -27,7 +27,7 @@ function calendar_framework_menu() {
   $items = array();
   
   $items['admin/settings/date-time/calendars'] = array(
-    'title' => 'Calendars Configuration',
+    'title' => 'Calendars',
     'description' => 'Configuration options for available calendars.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('calendar_framework_calendars_form'),
