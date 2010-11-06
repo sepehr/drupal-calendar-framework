@@ -14,9 +14,9 @@ function calendar_framework_requirements($phase) {
 }
 
 /**
- * Implements hook_install().
+ * Implements hook_enable().
  */
-function calendar_framework_install() {
+function calendar_framework_enable() {
   drupal_set_message(t('<a href="!link">Calendar Framework</a> has been successfully enabled.', array(
     '!link' => url('admin/settings/date-time/calendars'),
   )));
