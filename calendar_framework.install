@@ -24,6 +24,10 @@ function calendar_framework_install() {
  * Implements hook_uninstall().
  */
 function calendar_framework_uninstall() {
+  $calendars = calendar_framework_calendars();
 
+  foreach ($calendars as $identifer => $info) {
+    variable_del('calendar_framework_settings_' . $identifier);
+  }
 }
 

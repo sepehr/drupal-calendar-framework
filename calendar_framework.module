@@ -128,7 +128,7 @@ function _calendar_framework_calendars_build() {
   
   $calendars_defined = module_invoke_all('calendar_info');
   foreach ($calendars_defined as $identifier => $info) {
-    $info['config'] = variable_get('calendar_framework_' . $identifier . '_settings', '');
+    $info['config'] = variable_get('calendar_framework_settings_' . $identifier, '');
     $calendars[$identifier] = $info;
     $names = $info['name'];
   }
