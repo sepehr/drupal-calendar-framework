@@ -44,6 +44,35 @@ function calendar_framework_patch() {
 }
 
 /**
+ * Implements hook_format_date().
+ *
+ * This is a temporary hook implementation until we all get a better
+ * format_date() function at Drupal core. Until those days we need to patch
+ * the includes/common.inc file to provide the ability to implement hook_format_fate().
+ *
+ * @param $timestamp
+ *   Unix timestamp to be formatted. 
+ *   Don't worry, the proper timezone value has been added to this by format_date().
+ * @param $type
+ *   The format to use. Can be "small", "medium" or "large" for the preconfigured
+ *   date formats. If "custom" is specified, then $format is required as well.
+ * @param $format
+ *   PHP date() function format string.
+ * @param $langcode
+ *   Optional language code to translate to a language other than the default.
+ *
+ * @return
+ *   The formatted date or FALSE otherwise.
+ *
+ * @see format_date()
+ * @see calendar_framework_patch()
+ * @see patch/common.inc-format_date.d6.patch
+ */
+function calendar_framework_format_date($timestamp, $type, $format, $langcode) {
+  
+} 
+
+/**
  * API function to provide a list of all calendars.
  *
  * @param $op
