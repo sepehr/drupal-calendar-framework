@@ -54,10 +54,36 @@ function multical($calendar = NULL) {
  * API function to provide a list of all calendars.
  *
  * @param $op
- *   Requests the calendar list format.
+ *   The format of return list. Could be:
+ *     - calendar: Returns information about calendar identified by $identifier.
+ *     - calendars: Returns a list of all available calendar informations.
+ *     - name: Return the name of a calendar identified by $identifier.
+ *     - names: Returns a list of all available calendar names.
+ * @param $identifier
+ *   A calendar identifier to filter the results.
+ *
+ * @return
+ *   An array of calendars or a single calendar.
+ *
+ * @see _multical_calendars_build()
  */
-function multical_calendars() {
-
+function multical_calendars($op = 'calendars', $identifier = NULL) {
+  list($calendars, $names) = _multical_calendars_build();
+  
+  switch ($op) {
+    case 'calendars':
+      return $calendars;
+    
+    case 'calendar':
+      return array_merge($calendars[$identifer], array('identifier' => $identifier));
+      
+    case 'names':
+      return $names;
+      
+    case 'name':
+      return $names[$identifier];
+  }
+  
 }
 
 /**
@@ -67,15 +93,17 @@ function multical_calendars() {
  *   An array of available calendars.
  */
 function _multical_calendars_build() {
+  $names = array();
   $calendars = array();
   
   $calendars_defined = module_invoke_all('calendar_info');
   foreach ($calendars_defined as $identifier => $info) {
-    $info['config'] = variable_get('multical_' . $identifier . '_settings');
+    $info['config'] = variable_get('multical_' . $identifier . '_settings', '');
     $calendars[$identifier] = $info;
+    $names = $info['name'];
   }
   
-  return $calendars;
+  return array($calendars, asort($names));
 }
 
 /**
