@@ -1,0 +1,47 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Implements necessary hooks of Multical module, to add Gregorian Calendar as a placeholder.
+ */
+
+/**
+ * Implements hook_calendar_info().
+ */
+function multical_gregorian_calendar_info() {
+  $calendar = array();
+  
+  $calendar['gregorian'] = array(
+    'name' => t('Gregorian'),
+    'format callback' => 'multical_gregorian_formatter',
+    'admin form' => 'multical_gregorian_admin_form',
+  );
+  
+  return $calendar;
+}
+
+/**
+ * Gregorian calendar date formatter callback.
+ *
+ * @param $timestamp
+ *   Unix timestamp to be formatted. 
+ *   The proper timezone value has been added by the native format_date().
+ * @param $type
+ *   The format to use. Can be "small", "medium" or "large" for the preconfigured
+ *   date formats. If "custom" is specified, then $format is required as well.
+ * @param $format
+ *   PHP date() function format string.
+ * @param $langcode
+ *   Optional language code to translate to a language other than the default.
+ *
+ * @return
+ *   The formatted date or FALSE otherwise.
+ *
+ * @see format_date()
+ */
+function multical_gregorian_formatter($timestamp, $type, $format, $langcode) {
+  // Do nothing, it will be formatted 
+  // to gregorian by format_date() if we return FALSE.
+  return FALSE;
+}
