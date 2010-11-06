@@ -1,0 +1,29 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Implementation of Calendar Framework un/installation hooks.
+ */
+ 
+/**
+ * Implements hook_requirements().
+ */
+function calendar_framework_requirements($phase) {
+
+}
+
+/**
+ * Implements hook_install().
+ */
+function calendar_framework_install() {
+
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function calendar_framework_uninstall() {
+
+}
+

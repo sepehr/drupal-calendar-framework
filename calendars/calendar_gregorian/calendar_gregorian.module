@@ -3,20 +3,20 @@
 
 /**
  * @file
- * Implements necessary hooks of Multical module, to add Gregorian Calendar as a placeholder.
+ * Implements necessary hooks of Calendar Framework module, to add Gregorian Calendar as a placeholder.
  */
 
 /**
  * Implements hook_calendar_info().
  */
-function multical_gregorian_calendar_info() {
+function calendar_gregorian_calendar_info() {
   $calendar = array();
   
   $calendar['gregorian'] = array(
     'name' => t('Gregorian'),
-    'format callback' => 'multical_gregorian_formatter',
+    'format callback' => 'calendar_gregorian_formatter',
     'convert callback' => FALSE,
-    'admin form' => 'multical_gregorian_admin_form',
+    'admin form' => 'calendar_gregorian_admin_form',
   );
   
   return $calendar;
@@ -41,7 +41,7 @@ function multical_gregorian_calendar_info() {
  *
  * @see format_date()
  */
-function multical_gregorian_formatter($timestamp, $type, $format, $langcode) {
+function calendar_gregorian_formatter($timestamp, $type, $format, $langcode) {
   // Do nothing, it will be formatted 
   // to gregorian by format_date() if we return FALSE.
   return FALSE;

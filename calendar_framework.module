@@ -3,27 +3,27 @@
 
 /**
  * @file
- * Implements necessary hooks for Multical module, plus API and helper functions.
+ * Implements necessary hooks for Calendar Framework module, plus API and helper functions.
  */
 
 /**
  * Implements hook_perm().
  */
-function multical_perm() {
+function calendar_framework_perm() {
 
 }
  
 /**
  * Implements hook_init().
  */
-function multical_init() {
+function calendar_framework_init() {
 
 }
 
 /**
  * Implements hook_menu().
  */
-function multical_menu() {
+function calendar_framework_menu() {
 
 }
 
@@ -32,31 +32,15 @@ function multical_menu() {
  *
  * @see http://drupal.org/project/patchdoq
  */
-function multical_patch() {
+function calendar_framework_patch() {
   return array(
     'common.inc' => array(
       'name' => t('Core common.inc patch'),
       'description' => t('Drupal core common.inc expansion to support hook_format_date() implementations.'),
-      'file' => drupal_get_path('module', 'multical') . '/patch/common.inc-format_date.d6.patch',
+      'file' => drupal_get_path('module', 'calendar_framework') . '/patch/common.inc-format_date.d6.patch',
       'patch arguments' => '-p0',
     ),
   );
-}
-
-/**
- * The heart of API, which somehow acts as a ExtDateTime procedural factory wrapper.
- *
- * The function as the heart of the API instantiate the proper object 
- * corresponding to the passed calendar identifier or the default one.
- *
- * @param $calendar
- *   Calendar identifier.
- *
- * @return
- *   The instantiated calendar object.
- */
-function multical($calendar = NULL) {
-
 }
 
 /**
@@ -74,10 +58,10 @@ function multical($calendar = NULL) {
  * @return
  *   An array of calendars or a single calendar.
  *
- * @see _multical_calendars_build()
+ * @see _calendar_framework_calendars_build()
  */
-function multical_calendars($op = 'calendars', $identifier = NULL) {
-  list($calendars, $names) = _multical_calendars_build();
+function calendar_framework_calendars($op = 'calendars', $identifier = NULL) {
+  list($calendars, $names) = _calendar_framework_calendars_build();
   
   switch ($op) {
     case 'calendars':
@@ -101,13 +85,13 @@ function multical_calendars($op = 'calendars', $identifier = NULL) {
  * @return
  *   An array of available calendars.
  */
-function _multical_calendars_build() {
+function _calendar_framework_calendars_build() {
   $names = array();
   $calendars = array();
   
   $calendars_defined = module_invoke_all('calendar_info');
   foreach ($calendars_defined as $identifier => $info) {
-    $info['config'] = variable_get('multical_' . $identifier . '_settings', '');
+    $info['config'] = variable_get('calendar_framework_' . $identifier . '_settings', '');
     $calendars[$identifier] = $info;
     $names = $info['name'];
   }
@@ -121,7 +105,7 @@ function _multical_calendars_build() {
  * @return
  *   An array of default calendar information.
  */
-function multical_default_calendar() {
-  return multical_calendars('calendar', variable_get('multical_default_calendar', ''));
+function calendar_framework_default_calendar() {
+  return calendar_framework_calendars('calendar', variable_get('calendar_framework_default_calendar', ''));
 }
 

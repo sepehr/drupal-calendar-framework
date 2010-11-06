@@ -1,0 +1,7 @@
+; $Id$
+name = "Gregorian Calendar"
+description = "Gregorian calendar for Calendar Framework. Actually this is a placeholder calendar for the sake of framework consistency. The default one is gregorian."
+php = 5.2
+core = 6.x
+package = "Calendar Framework"
+dependencies[] = calendar_framework

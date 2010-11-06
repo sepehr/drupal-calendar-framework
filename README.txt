@@ -1,6 +1,6 @@
 Description
 ===========
-Drupal clean multiple calendar support.
+Drupal Calendar Framework to support multiple calendars.
 
 Important Notice
 ================

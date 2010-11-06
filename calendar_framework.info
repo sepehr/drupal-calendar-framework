@@ -1,0 +1,6 @@
+; $Id$
+name = "Calendar Framework"
+description = "Multiple calendar support."
+php = 5.2
+core = 6.x
+package = "Calendar Framework"

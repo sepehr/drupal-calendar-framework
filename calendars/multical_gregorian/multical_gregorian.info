@@ -1,7 +1,0 @@
-; $Id$
-name = "Multical Gregorian Calendar"
-description = "Gregorian calendar for multical framework. Actually this is a placeholder calendar for the sake of framework consistency. The default one is gregorian."
-php = 5.2
-core = 6.x
-package = Multical
-dependencies[] = multical
