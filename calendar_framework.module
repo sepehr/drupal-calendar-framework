@@ -59,8 +59,7 @@ function calendar_framework_menu() {
  *   Calendar menu title.
  */
 function calendar_framework_calendar_title($identifier) {
-  $calendar = calendar_framework_calendars('name', $identifier);
-  return sprintf('%s Calendar', $calendar);
+  return sprintf('%s Calendar', calendar_framework_calendars('name', $identifier));
 }
 
 /**
