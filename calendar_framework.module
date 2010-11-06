@@ -10,7 +10,7 @@
  * Implements hook_perm().
  */
 function calendar_framework_perm() {
-
+  return array('administer calendar framework');
 }
  
 /**
@@ -24,13 +24,36 @@ function calendar_framework_init() {
  * Implements hook_menu().
  */
 function calendar_framework_menu() {
-
+  $items = array();
+  
+  $items['admin/settings/date-time/calendars'] = array(
+    'title' => 'Calendars Configuration',
+    'description' => 'Configuration options for available calendars.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('calendar_framework_calendars_form'),
+    'access arguments' => array('administer calendar framework'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 3,
+  );
+  
+  $items['admin/settings/date-time/calendars/%'] = array(
+    'title callback' => 'calendar_framework_calendar_title',
+    'title arguments' => array(4),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('calendar_framework_calendar_form', 4),
+    'access arguments' => array('administer calendar framework'),
+    'file' => 'calendar_framework.admin.inc',
+    'type' => MENU_DCALLBACK,
+  );
+  
+  return $items;
 }
 
 /**
  * Implements hook_patch().
  *
  * @see http://drupal.org/project/patchdoq
+ * @see http://doques.net/node/367
  */
 function calendar_framework_patch() {
   return array(
