@@ -78,7 +78,7 @@ function calendar_framework_format_date($timestamp, $type, $format, $langcode) {
   }
   
   return $calendar['format callback']($timestamp, $type, $format, $langcode, $calendar);
-} 
+}
 
 /**
  * API function to provide a list of all available calendars.

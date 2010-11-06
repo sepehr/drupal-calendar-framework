@@ -35,13 +35,15 @@ function calendar_gregorian_calendar_info() {
  *   PHP date() function format string.
  * @param $langcode
  *   Optional language code to translate to a language other than the default.
+ * @param $calendar
+ *   A copy of calendar information.
  *
  * @return
  *   The formatted date or FALSE otherwise.
  *
  * @see format_date()
  */
-function calendar_gregorian_formatter($timestamp, $type, $format, $langcode) {
+function calendar_gregorian_formatter($timestamp, $type, $format, $langcode, $calendar) {
   // Do nothing, it will be formatted 
   // to gregorian by format_date() if we return FALSE.
   return FALSE;
