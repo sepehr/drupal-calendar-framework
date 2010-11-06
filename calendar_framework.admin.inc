@@ -29,6 +29,6 @@ function calendar_framework_calendars_form() {
  *
  * @ingroup forms
  */
-function calendar_framework_calendars_form(&$form_state, $identifier) {
+function calendar_framework_calendar_form(&$form_state, $identifier) {
 
 }
