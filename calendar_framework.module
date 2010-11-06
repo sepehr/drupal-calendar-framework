@@ -46,9 +46,10 @@ function calendar_framework_patch() {
 /**
  * Implements hook_format_date().
  *
- * This is a temporary hook implementation until we all get a better
- * format_date() function at Drupal core. Until those days we need to patch
- * the includes/common.inc file to provide the ability to implement hook_format_fate().
+ * This is a temporary hook implementation which employs a procedural concept of 
+ * Factory design pattern until we all get a better format_date() function at Drupal core. 
+ * Till those days we need to patch the includes/common.inc file to provide 
+ * the ability to implement hook_format_fate().
  *
  * @param $timestamp
  *   Unix timestamp to be formatted. 
@@ -69,11 +70,18 @@ function calendar_framework_patch() {
  * @see patch/common.inc-format_date.d6.patch
  */
 function calendar_framework_format_date($timestamp, $type, $format, $langcode) {
+  $calendar = calendar_framework_default_calendar();
   
+  // Skip the process, if the default calendar has not implemented a formatter callback.
+  if (!isset($calendar['format callback']) || !function_exists($calendar['format callback'])) {
+    return FALSE;
+  }
+  
+  return $calendar['format callback']($timestamp, $type, $format, $langcode, $calendar);
 } 
 
 /**
- * API function to provide a list of all calendars.
+ * API function to provide a list of all available calendars.
  *
  * @param $op
  *   The format of return list. Could be:
@@ -109,7 +117,7 @@ function calendar_framework_calendars($op = 'calendars', $identifier = NULL) {
 }
 
 /**
- * Helper function to collect a list of defined calendars.
+ * Helper function to build a list of defined calendars.
  *
  * @return
  *   An array of available calendars.
