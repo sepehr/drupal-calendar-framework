@@ -15,6 +15,7 @@ function multical_gregorian_calendar_info() {
   $calendar['gregorian'] = array(
     'name' => t('Gregorian'),
     'format callback' => 'multical_gregorian_formatter',
+    'convert callback' => FALSE,
     'admin form' => 'multical_gregorian_admin_form',
   );
   
