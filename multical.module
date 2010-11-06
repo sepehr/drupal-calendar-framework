@@ -29,9 +29,18 @@ function multical_menu() {
 
 /**
  * Implements hook_patch().
+ *
+ * @see http://drupal.org/project/patchdoq
  */
 function multical_patch() {
-
+  return array(
+    'common.inc' => array(
+      'name' => t('Core common.inc patch'),
+      'description' => t('Drupal core common.inc expansion to support hook_format_date() implementations.'),
+      'file' => drupal_get_path('module', 'multical') . '/patch/common.inc-format_date.d6.patch',
+      'patch arguments' => '-p0',
+    ),
+  );
 }
 
 /**
