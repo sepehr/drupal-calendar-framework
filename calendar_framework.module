@@ -107,7 +107,7 @@ function calendar_framework_patch() {
  */
 function calendar_framework_format_date($timestamp, $type, $format, $langcode) {
   $calendar = calendar_framework_default_calendar();
-  
+
   // Skip the process, if the default calendar has not implemented a formatter callback.
   if (!isset($calendar['format callback']) || !function_exists($calendar['format callback'])) {
     return FALSE;
@@ -135,13 +135,13 @@ function calendar_framework_format_date($timestamp, $type, $format, $langcode) {
  */
 function calendar_framework_calendars($op = 'calendars', $identifier = NULL) {
   list($calendars, $names) = _calendar_framework_calendars_build();
-  
+
   switch ($op) {
     case 'calendars':
       return $calendars;
     
     case 'calendar':
-      return array_merge($calendars[$identifer], array('identifier' => $identifier));
+      return array_merge($calendars[$identifier], array('identifier' => $identifier));
       
     case 'names':
       return $names;
@@ -164,12 +164,12 @@ function _calendar_framework_calendars_build() {
   
   $calendars_defined = module_invoke_all('calendar_info');
   foreach ($calendars_defined as $identifier => $info) {
-    $info['config'] = variable_get('calendar_framework_settings_' . $identifier, '');
+    $info['config'] = variable_get('calendar_framework_settings_' . $identifier, '');    
     $calendars[$identifier] = $info;
-    $names = $info['name'];
+    $names[$identifier] = $info['name'];     
   }
-  
-  return array($calendars, asort($names));
+
+  return array($calendars, $names);
 }
 
 /**
@@ -179,6 +179,6 @@ function _calendar_framework_calendars_build() {
  *   An array of default calendar information.
  */
 function calendar_framework_default_calendar() {
-  return calendar_framework_calendars('calendar', variable_get('calendar_framework_default_calendar', ''));
+  return calendar_framework_calendars('calendar', variable_get('calendar_framework_default_calendar', 'gregorian'));
 }
 
