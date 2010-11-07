@@ -9,11 +9,10 @@
 /**
  * Implements hook_enable().
  */
-function calendar_framework_enable() {dpm(':::' . var_export(function_exists('t'), TRUE));
-  $t = get_t();
+function calendar_framework_enable() {
   $type = 'status';
 
-  $advice = $t('This is strongly recommended to use <a href="!patchdoq">Patchdoq</a> or <a href="!patchmanager">Patch Manager</a> to handle core and contrib patches.',
+  $advice = t('This is strongly recommended to use <a href="!patchdoq">Patchdoq</a> or <a href="!patchmanager">Patch Manager</a> to handle core and contrib patches.',
     array(
       '!patchdoq' => module_exists('patchdoq') ? url('admin/build/patchdoq') : 'http://drupal.org/project/patchdoq',
       '!patchmanager' => module_exists('patch_manager') ? url('admin/build/patch') : 'http://drupal.org/project/patch_manager',
@@ -24,7 +23,7 @@ function calendar_framework_enable() {dpm(':::' . var_export(function_exists('t'
   // message and change all message types to 'warning'.
   if (!_calendar_framework_patch_applied()) {
     $type = 'warning';
-    drupal_set_message($t('Even though the <a href="!link">Calendar Framework</a> module is now enabled, it is useless till you properly apply the patch.',
+    drupal_set_message(t('Even though the <a href="!link">Calendar Framework</a> module is now enabled, it is useless till you properly apply the patch.',
       array(
         '!link' => url('admin/settings/date-time/calendars'),
       )
