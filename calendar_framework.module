@@ -141,7 +141,7 @@ function calendar_framework_calendars($op = 'calendars', $identifier = NULL) {
       return $calendars;
     
     case 'calendar':
-      return array_merge($calendars[$identifier], array('identifier' => $identifier));
+        return is_array($calendars[$identifier]) ? array_merge($calendars[$identifier], array('identifier' => $identifier)) : NULL;
       
     case 'names':
       return $names;

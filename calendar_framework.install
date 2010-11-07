@@ -10,27 +10,36 @@
  * Implements hook_enable().
  */
 function calendar_framework_enable() {
-  $type = 'status';
-
-  $advice = t('It is strongly recommended to use <a href="!patchdoq">Patchdoq</a> or <a href="!patchmanager">Patch Manager</a> to handle core and contrib patches. Do not forget that you need to make patch target files writable for webserver (0646) or you cannot patch them via the web interface of those modules.',
+  // Include helpers.
+  module_load_include('inc', 'calendar_framework');
+  
+  // I know, I'm talking too much!
+  $notice = t('Also notice that you need to make <em>patch target files</em> writable for webserver (0646) or you cannot patch them via the web interface of these modules.');
+  $warning = t('Even though the <a href="!link">Calendar Framework</a> module is now enabled, it is useless till you properly apply the patch.',
+    array(
+      '!link' => url('admin/settings/date-time/calendars'),
+    )
+  );
+  $advice = t('It is strongly recommended to use <a href="!patchdoq">Patchdoq</a> or <a href="!patchmanager">Patch Manager</a> to handle core and contrib patches.',
     array(
       '!patchdoq' => module_exists('patchdoq') ? url('admin/build/patchdoq') : 'http://drupal.org/project/patchdoq',
       '!patchmanager' => module_exists('patch_manager') ? url('admin/build/patch') : 'http://drupal.org/project/patch_manager',
     )
   );
-
-  // If the patch is not yet applied, set an additional
-  // message and change all message types to 'warning'.
+  
   if (!_calendar_framework_patch_applied()) {
-    $type = 'warning';
-    drupal_set_message(t('Even though the <a href="!link">Calendar Framework</a> module is now enabled, it is useless till you properly apply the patch.',
+    drupal_set_message($warning, 'warning');
+    drupal_set_message($advice, 'warning');
+    drupal_set_message($notice, 'warning');
+  }
+  else {
+    drupal_set_message(t('<a href="!link">Calendar Framework</a> is now successfully installed and running. Thank you for applying that patch.',
       array(
         '!link' => url('admin/settings/date-time/calendars'),
       )
-    ), $type);
+    ));
+    drupal_set_message($advice);
   }
-  
-  drupal_set_message($advice, $type);
 }
 
 
@@ -39,15 +48,32 @@ function calendar_framework_enable() {
  */
 function calendar_framework_install() {
   if (module_exists('patch_manager')) {
+    // Include helpers.
+    module_load_include('inc', 'calendar_framework');
+    
+    // Get proper translator function.
     $t = get_t();
     
     // Introduce the patch to patch_manager.module.
-    _calendar_framework_patch_manager_insert();
-    drupal_set_message($t('Calendar Framework patch has been successfully copied to files directory, Also <em>introduced</em> to <a href ="!patchmanager">Patch Manager</a> but it is <u>not yet applied</u>. Do not forget that you need to make patch target files writable (0646) for webserver or you cannot patch them via the web interface of those modules.',
-      array(
-        '!patchmanager' => url('admin/build/patch'),
-      )
-    ));
+    if(_calendar_framework_patch_manager_insert()) {
+      // Set the proper message.
+      $message = $t('Calendar Framework patch has been successfully copied to files directory, Also <em>introduced</em> to <a href ="!patchmanager">Patch Manager</a>.',
+        array(
+          '!patchmanager' => url('admin/build/patch'),
+        )
+      );
+      
+      if (_calendar_framework_patch_applied()) {
+        $type = 'status';
+        $message .= ' ' . $t('Anyway you need not to apply the patch.');
+      }
+      else {
+        $type = 'warning';
+        $message .= ' ' . $t('But it is <u>not yet applied</u>.');
+      }
+      
+      drupal_set_message($message, $type);
+    }
   }
 }
 
@@ -56,10 +82,13 @@ function calendar_framework_install() {
  * Implements hook_uninstall().
  */
 function calendar_framework_uninstall() {
-  // Module API is not available at this point.
-  // Using db_query() and LIKE is un-encouraged.
-  include_once dirname(__FILE__) . '/calendar_framework.module';
-
+  // Module API is not available at this point. Using
+  // db_query() and LIKE is un-encouraged. So, load the API.
+  drupal_load('module', 'calendar_framework');
+  
+  // Also include module helpers.
+  module_load_include('inc', 'calendar_framework');
+  
   // Remove all calendars settings.
   $calendars = calendar_framework_calendars();
   foreach ($calendars as $identifer => $info) {
@@ -76,11 +105,14 @@ function calendar_framework_uninstall() {
  */
 function calendar_framework_requirements($phase) {
   global $base_url;
-
+  
+  // Include helpers.
+  module_load_include('inc', 'calendar_framework');
+    
   $t = get_t();
   $requirements = array();
   $patch_info = _calendar_framework_patch_info();
-  $requirements_error = $t('Calendar Framework <a href="!patch">patch</a> is not yet applied to <em>!patch_target</em> file, but it is required for the module to function. Please refer to <a href="!docs">Applying Patches Documentation</a> to be able to apply this patch correctly. Also, It is strongly recommended to use <a href="!patchdoq">Patchdoq</a> or <a href="!patchmanager">Patch Manager</a> to handle core and contrib patches.',
+  $requirements_error = $t('Calendar Framework <a href="!patch">patch</a> is not applied to <em>!patch_target</em> file, but it is <u>required</u> for the module to work. Please refer to <a href="!docs">Applying Patches Documentation</a> to be able to apply this patch correctly. Also, It is strongly recommended to use <a href="!patchdoq">Patchdoq</a> or <a href="!patchmanager">Patch Manager</a> to handle core and contrib patches.',
     array(
       '!patch' => $base_url . '/' . $patch_info['path'] . $patch_info['name'],
       '!patch_target' => $patch_info['target'],
@@ -95,7 +127,7 @@ function calendar_framework_requirements($phase) {
     return $requirements;
   }
 
-  // Setting proper requirements severity.
+  // Allow user to enable the module if there are a 'patch manager' module available.
   if ($phase == 'install' && (module_exists('patchdoq') || module_exists('patch_manager'))) {
     $requirements_severity = REQUIREMENT_WARNING;
   }
@@ -109,157 +141,5 @@ function calendar_framework_requirements($phase) {
   );
 
   return $requirements;
-}
-
-
-/**
- * Helper function to check whether the patch
- * is applied to the patch target file or not.
- *
- * @return
- *   Boolean value.
- *
- * @todo Check whether the runkit extension is loaded to do a dirty magic.
- */
-function _calendar_framework_patch_applied() {
-  $patch_info = _calendar_framework_patch_info();
-
-  // Patch target relative path to Drupal base.
-  $relative_path = $patch_info['target'];
-
-  // Patch target absolute path.
-  if (module_exists('absolute_path')) {
-    global $absolute_path;
-    $target = $absolute_path . '/' . $relative_path;
-  }
-  else {
-    $target = realpath(drupal_get_path('module', 'system') . '/../../' . $relative_path);
-  }
-
-  // Applied?
-  // We won't get a negetive position ever.
-  return (bool) strpos(file_get_contents($target), $patch_info['fingerprint']);
-}
-
-
-/**
- * Helper function to create a patch record
- * for patch_manager.module once the module gets installed.
- *
- * @param $patch_filename
- *   The name of the patch file.
- * @param $patch_filepath
- *   The relative path of patch file.
- *
- * @see http://drupal.org/project/patch_manager
- */
-function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patch_filepath = FALSE) {
-  if (!module_exists('patch_manager')) {
-    return;
-  }
-  
-  global $user;
-  $patch_info = _calendar_framework_patch_info();
-  
-  // Copy the patch to Drupal files directory,
-  // This way the file could be seen by CCK filefield.
-  // TODO: Now there might be a filefield_paths issue, fix!
-  $new_path = file_directory_path() . '/';
-  copy($patch_info['path'] . $patch_info['name'], $new_path . $patch_info['name']);
-  
-  // Oh, I wish I could automate eth!
-  // chmod($patch_info['target'], 0646);
-  
-  // Create the patch file.
-  $file = new stdClass();
-  $file->list = 1;
-  $file->uid = $user->uid;
-  $file->timestamp = time();
-  $file->filename = $patch_info['name'];
-  $file->filesource = $patch_info['name'];
-  $file->filemime = file_get_mimetype($patch_info['name']);
-  $file->filepath = $new_path . $patch_info['name'];
-  $file->filesize = filesize($new_path . $patch_info['name']);
-  $file->status = FILE_STATUS_PERMANENT;
-
-  // Save the patch file.
-  // Oh, we miss D7 file_save().
-  drupal_write_record('files', $file);
-  $file->fid = db_result(db_query("SELECT fid FROM {files} WHERE filepath = '%s'", $file->filepath));        
-	
-  // Create the patch node.
-  $patch = new stdClass();
-  $patch->type = 'patch';
-  $patch->language = 'en';
-  $patch->uid = $user->uid;
-  $patch->title = t('Calendar Framework common.inc patch for core');
-  $patch->body = t('Drupal core common.inc expansion to support hook_format_date() implementations.');
-  $patch->field_module[0]['value'] = 'core';
-  
-  // Attach the patch file to the node.
-  $patch->field_patch[0] = array(
-		'fid' => $file->fid,
-		'title' => $file->filename,
-		'filename' => $file->filename,
-		'filepath' => $file->filepath,
-		'filesize' => $file->filesize,
-		'mimetype' => $file->filemime,
-		'list' => 1,
-	);
-  
-  // Save the patch node.
-  content_presave($patch); 
-  node_save($patch);
-  content_insert($patch);
-}
-
-
-/**
- * Helper function to remove the patch record.
- *
- * @see http://drupal.org/node/292151
- * @see http://drupal.org/project/patch_manager
- */
-function _calendar_framework_patch_manager_delete() {
-  $path = file_directory_path() . '/' . _calendar_framework_patch_info('name');
-  $query = "SELECT ctp.nid
-            FROM {files} f
-            LEFT JOIN {content_type_patch} ctp ON f.fid = ctp.field_patch_fid
-            WHERE f.filepath = '%s'";
-            
-  $nid = db_result(db_query($query, $path));
-  node_delete($nid);   
-}
-
-
-/**
- * Helper function to return patch info.
- *
- * @param $type
- *   Patch info type to return.
- *   - all: Returns all information.
- *   - name: Returns patch file name.
- *   - path: Returns patch file path.
- *   - target: Returns patch file target.
- *   - finger: Returns patch fingerprint to check whether the patch is applied or not.
- *
- * @return
- *   Either partial or full Patch info.
- */
-function _calendar_framework_patch_info($type = 'all') {
-  $info = array(
-    'target' => 'includes/common.inc',
-    'name' => 'common.inc-format_date.d6.patch',
-    'path' => drupal_get_path('module', 'calendar_framework') . '/patch/',
-    'fingerprint' => 'foreach (module_implements(\'format_date\') as $module)',
-  );
-  
-  switch ($type) {
-    case 'all':
-      return $info;
-    
-    default:
-      return $info[$type];
-  }
 }
 
