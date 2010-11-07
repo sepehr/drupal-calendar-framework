@@ -12,13 +12,15 @@
 function calendar_framework_perm() {
   return array('administer calendar framework');
 }
- 
+
+
 /**
  * Implements hook_init().
  */
 function calendar_framework_init() {
 
 }
+
 
 /**
  * Implements hook_menu().
@@ -50,6 +52,7 @@ function calendar_framework_menu() {
   return $items;
 }
 
+
 /**
  * Calendar menu title callback.
  *
@@ -62,6 +65,7 @@ function calendar_framework_menu() {
 function calendar_framework_calendar_title($identifier) {
   return sprintf('%s Calendar', calendar_framework_calendars('name', $identifier));
 }
+
 
 /**
  * Implements hook_patch().
@@ -79,6 +83,7 @@ function calendar_framework_patch() {
     ),
   );
 }
+
 
 /**
  * Implements hook_format_date().
@@ -117,6 +122,20 @@ function calendar_framework_format_date($timestamp, $type, $format, $langcode) {
   return $calendar['format callback']($timestamp, $type, $format, $langcode, $calendar);
 }
 
+
+/**
+ * Implements hook_theme().
+ */
+function calendar_framework_theme() {
+  return array(
+    'calendar_framework_calendars_form' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'calendar_framework.admin.inc',
+    ),
+  );
+}
+
+
 /**
  * API function to provide a list of all available calendars.
  *
@@ -153,6 +172,7 @@ function calendar_framework_calendars($op = 'calendars', $identifier = NULL) {
   
 }
 
+
 /**
  * Helper function to build a list of defined calendars.
  *
@@ -172,6 +192,7 @@ function _calendar_framework_calendars_build() {
 
   return array($calendars, $names);
 }
+
 
 /**
  * API function to get current default calendar.
