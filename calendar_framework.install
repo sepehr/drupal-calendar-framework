@@ -150,6 +150,8 @@ function _calendar_framework_patch_applied() {
  *   The name of the patch file.
  * @param $patch_filepath
  *   The relative path of patch file.
+ *
+ * @see http://drupal.org/project/patch_manager
  */
 function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patch_filepath = FALSE) {
   if (!module_exists('patch_manager')) {
@@ -216,6 +218,7 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
  * Helper function to remove the patch record.
  *
  * @see http://drupal.org/node/292151
+ * @see http://drupal.org/project/patch_manager
  */
 function _calendar_framework_patch_manager_delete() {
   $path = file_directory_path() . '/' . _calendar_framework_patch_info('name');
