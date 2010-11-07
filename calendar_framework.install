@@ -51,7 +51,7 @@ function calendar_framework_requirements($phase) {
     $requirements['calendar_framework'] = array(
       'title' => $t('Calendar Framework'),
       'value' => $t('Patch not applied'),
-      'severity' => REQUIREMENT_ERROR,
+      'severity' => module_exists('patch_manager') ? REQUIREMENT_WARNING : REQUIREMENT_ERROR,
       'description' => $t('Calendar Framework patch is not yet applied to <em>includes/common.inc</em> file, but it is required for the module to be able to function. Please refer to <em><a href="!docs">Applying Patches</a></em> documentation to correctly apply this patch. Also, It is strongly recommended to use <a href="!patchdoq">Patchdoq</a> or <a href="!patchmanager">Patch Manager</a> to manage core and contrib patches.',
         array(
           '!docs' => 'http://drupal.org/patch/apply',
