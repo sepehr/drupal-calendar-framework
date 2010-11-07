@@ -43,7 +43,7 @@ function calendar_framework_menu() {
     'page arguments' => array('calendar_framework_calendar_form', 4),
     'access arguments' => array('administer calendar framework'),
     'file' => 'calendar_framework.admin.inc',
-    'type' => MENU_DCALLBACK,
+    'type' => MENU_CALLBACK,
   );
   
   return $items;
