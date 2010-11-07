@@ -5,21 +5,16 @@
  * @file
  * Implementation of Calendar Framework un/installation hooks.
  */
- 
-/**
- * Implements hook_requirements().
- */
-function calendar_framework_requirements($phase) {
-
-}
 
 /**
  * Implements hook_enable().
  */
 function calendar_framework_enable() {
-  drupal_set_message(t('<a href="!link">Calendar Framework</a> has been successfully enabled.', array(
-    '!link' => url('admin/settings/date-time/calendars'),
-  )));
+  drupal_set_message(st('<a href="!link">Calendar Framework</a> has been successfully enabled.',
+    array(
+      '!link' => url('admin/settings/date-time/calendars'),
+    )
+  ));
 }
 
 /**
@@ -31,5 +26,98 @@ function calendar_framework_uninstall() {
   foreach ($calendars as $identifer => $info) {
     variable_del('calendar_framework_settings_' . $identifier);
   }
+}
+
+/**
+ * Implements hook_requirements().
+ */
+function calendar_framework_requirements($phase) {
+  $t = get_t();
+  $requirements = array();
+
+  if (_calendar_framework_patch_check()) {
+    $requirements['calendar_framework'] = array(
+      'title' => $t('Calendar Framework'),
+      'value' => $t('Patch is applied'),
+      'severity' => REQUIREMENT_OK,
+      'description' => $t('Calendar Framework patch is now applied and module has been successfully installed.'),
+    );
+  }
+  else {
+    $requirements['calendar_framework'] = array(
+      'title' => $t('Calendar Framework'),
+      'value' => $t('Patch not applied'),
+      'severity' => REQUIREMENT_ERROR,
+      'description' => $t('Calendar Framework patch is not yet applied to <em>includes/common.inc</em> file, but it is required for the module to be able to function. Please refer to <em><a href="!docs">Applying Patches</a></em> documentation to correctly apply this patch. Also, It is strongly recommended to use <a href="!patchdoq">Patchdoq</a> or <a href="!patchmanager">Patch Manager</a> to manage core and contrib patches.',
+        array(
+          '!docs' => 'http://drupal.org/patch/apply',
+          '!patchdoq' => module_exists('patchdoq') ? url('admin/build/patchdoq') : 'http://drupal.org/project/patchdoq',
+          '!patchmanager' => module_exists('patch_manager') ? url('admin/build/patch') : 'http://drupal.org/project/patch_manager',
+        )
+      ),
+    );
+  }
+
+  return $requirements;
+}
+
+/**
+ * Helper function to check whether the patch
+ * is applied to the core includes/common.inc file or not.
+ *
+ * @return
+ *   Boolean value.
+ *
+ * @todo Check whether the runkit extension is loaded or not.
+ */
+function _calendar_framework_patch_check() {
+  // Patch existance identifier.
+  $patch_id = 'foreach (module_implements(\'format_date\') as $module)';
+
+  // Patch target relative path to Drupal base.
+  $relative_path = 'includes/common.inc';
+
+  // Patch target absolute path.
+  if (module_exists('absolute_path')) {
+    global $absolute_path;
+    $target = $absolute_path . '/' . $relative_path;
+  }
+  else {
+    $target = realpath(drupal_get_path('module', 'system') . '/../../' . $relative_path);
+  }
+
+  // Applied?
+  if (strpos(_calendar_framework_fetch($target), $patch_id) === FALSE) {
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+/**
+ * Helper function to fetch a file contents.
+ *
+ * @param $target
+ *   Path of the target file.
+ * @param $use_curl
+ *   Whether to employ cURL or not.
+ *
+ * @return
+ *   File contents.
+ */
+function _calendar_framework_fetch($target, $use_curl = TRUE) {
+  if (!extension_loaded('curl') || !$use_curl) {
+    return file_get_contents($target);
+  }
+
+  $curl = curl_init();
+  curl_setopt($curl, CURLOPT_URL, $target);
+  curl_setopt($curl, CURLOPT_HEADER, FALSE);
+  curl_setopt($curl, CURLOPT_FAILONERROR, TRUE);
+  curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+
+  $contents = curl_exec($curl);
+  curl_close($curl);
+  return (string) $contents;
 }
 
