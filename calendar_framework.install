@@ -165,7 +165,7 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
   $new_path = file_directory_path() . '/';
   copy($patch_info['path'] . $patch_info['name'], $new_path . $patch_info['name']);
   
-  // Oh, I wish I could!
+  // Oh, I wish I could automate eth!
   // chmod($patch_info['target'], 0646);
   
   // Create the patch file.
