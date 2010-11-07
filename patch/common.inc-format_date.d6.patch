@@ -7,7 +7,7 @@ index 2ca8c72..ce8fef8 100644
    }
  
 +  foreach (module_implements('format_date') as $module) {
-+    // date,module implements a date_format_date() function, skip it.
++    // date.module implements a date_format_date() function, skip it.
 +    if ($module != 'date') {
 +      $function = $module . '_format_date';
 +      $date = $function($timestamp, $type, $format, $langcode);
