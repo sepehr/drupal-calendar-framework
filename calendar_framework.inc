@@ -3,7 +3,7 @@
 
 /**
  * @file
- * Calendar Framework helper functions which needs to be used in various module files.
+ * Calendar Framework helper functions which need to be used in various module files.
  */
 
 /**
