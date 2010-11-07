@@ -15,6 +15,16 @@ function calendar_framework_enable() {
       '!link' => url('admin/settings/date-time/calendars'),
     )
   ));
+  
+  // If patch_manager exists, create a patch node type.
+  if (module_exists('patch_manager')) {
+    $patch = new stdClass();
+    $patch->type = 'patch';
+    $patch->title = t('Core common.inc patch');
+    $patch->body = t('Drupal core common.inc expansion to support hook_format_date() implementations.');
+    
+    node_save($node);
+  }
 }
 
 /**
