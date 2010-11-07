@@ -43,7 +43,7 @@ function calendar_framework_install() {
     
     // Introduce the patch to patch_manager.module.
     _calendar_framework_patch_manager_insert();
-    drupal_set_message($t('Calendar Framework patch has been successfully copied to files directory, Also <em>introduced</em> to <a href ="!patchmanager">Patch Manager</a>. Do not forget that you need to make patch target files writable (0646) for webserver or you cannot patch them via the web interface of those modules.',
+    drupal_set_message($t('Calendar Framework patch has been successfully copied to files directory, Also <em>introduced</em> to <a href ="!patchmanager">Patch Manager</a> but it is <u>not yet applied</u>. Do not forget that you need to make patch target files writable (0646) for webserver or you cannot patch them via the web interface of those modules.',
       array(
         '!patchmanager' => url('admin/build/patch'),
       )
