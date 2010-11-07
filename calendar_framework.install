@@ -21,8 +21,12 @@ function calendar_framework_enable() {
  * Implements hook_uninstall().
  */
 function calendar_framework_uninstall() {
+  // Module API is not available here.
+  // Using db_query() and LIKE is unencouraged.
+  include_once dirname(__FILE__) . '/calendar_framework.module';
+  
+  // Remove all calendars settings.
   $calendars = calendar_framework_calendars();
-
   foreach ($calendars as $identifer => $info) {
     variable_del('calendar_framework_settings_' . $identifier);
   }
@@ -68,7 +72,7 @@ function calendar_framework_requirements($phase) {
  * @return
  *   Boolean value.
  *
- * @todo Check whether the runkit extension is loaded or not.
+ * @todo Check whether the runkit extension is loaded to do some dirty magic.
  */
 function _calendar_framework_patch_check() {
   // Patch existance identifier.
