@@ -53,14 +53,20 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
   }
   
   global $user;
+  $t = get_t();
   $patch_info = _calendar_framework_patch_info();
   
   // Copy the patch to Drupal files directory,
-  // This way the file could be seen by CCK filefield.
-  // TODO: Now there might be a filefield_paths issue, fix!
-  // TODO: Wipe that error suppression mess, kid!
+  // This way the file could be seen by CCK 
+  // filefield. Sorry for the suppression load mess!
   $new_path = file_directory_path() . '/';
   if (!@copy($patch_info['path'] . $patch_info['name'], $new_path . $patch_info['name'])) {
+    drupal_set_message($t('You have <a href="!patchmanager">Patch Manger</a> installed but we could not copy the Calendar Framework patch to files directory. Please check directory permissions and reinstall the module.',
+      array(
+        '!patchmanager' => url('admin/build/patch'),
+      )
+    ), 'warning');
+
     return FALSE;
   }
   
@@ -89,8 +95,8 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
   $patch->type = 'patch';
   $patch->language = 'en';
   $patch->uid = $user->uid;
-  $patch->title = t('Calendar Framework common.inc patch for core');
-  $patch->body = t('Drupal core common.inc expansion to support hook_format_date() implementations.');
+  $patch->title = $t('Calendar Framework common.inc patch for core');
+  $patch->body = $t('Drupal core common.inc expansion to support hook_format_date() implementations.');
   $patch->field_module[0]['value'] = 'core';
   
   // Attach the patch file to the node.

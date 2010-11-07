@@ -33,7 +33,7 @@ function calendar_framework_enable() {
     drupal_set_message($notice, 'warning');
   }
   else {
-    drupal_set_message(t('<a href="!link">Calendar Framework</a> is now successfully installed and running. Thank you for applying that patch.',
+    drupal_set_message(t('<a href="!link">Calendar Framework</a> is now successfully installed and running. The patch is applied to the system.',
       array(
         '!link' => url('admin/settings/date-time/calendars'),
       )
@@ -62,16 +62,16 @@ function calendar_framework_install() {
           '!patchmanager' => url('admin/build/patch'),
         )
       );
-      
+
       if (_calendar_framework_patch_applied()) {
         $type = 'status';
-        $message .= ' ' . $t('Anyway you need not to apply the patch.');
+        $message .= ' ' . $t('Anyway you need not to re-apply the patch.');
       }
       else {
         $type = 'warning';
         $message .= ' ' . $t('But it is <u>not yet applied</u>.');
       }
-      
+
       drupal_set_message($message, $type);
     }
   }
