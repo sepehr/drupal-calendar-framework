@@ -15,7 +15,35 @@
  * @ingroup forms
  */
 function calendar_framework_calendars_form() {
+  $forms = $options = array();
+  $calendars = calendar_framework_calendars();
+  
+  foreach ($calendars as $identifier => $calendar) {
+    $options[$identifier] = '';
 
+    $form[$identifier]['id'] = array(
+      '#value' => $identifier,
+    );
+    
+    $form[$identifier]['config'] = array(
+      '#value' => function_exists($calendar['admin form']) ? 
+        l(t('Configuration'), 'admin/settings/date-time/calendars/' . $identifier) :
+        t('No configuration'),
+    );
+  }
+  
+  $form['default'] = array(
+    '#type' => '',
+    '#default_value' => variable_get('calendar_framework_default_calendar', 'gregorian'),
+    '#options' => $options,
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save as default'),
+  );
+  
+  return $form;
 }
 
 /**
