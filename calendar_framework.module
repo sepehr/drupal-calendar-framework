@@ -55,7 +55,7 @@ function calendar_framework_form_alter(&$form, $form_state, $form_id) {
     $form['calendar_framework_lang_calendar'][$lang] = array(
       '#type' => 'select',
       '#options' => $calendars += array('default' => t('Default Calendar')),
-      '#access' => user_access('administer calendar framework') ? TRUE : FALSE;
+      '#access' => user_access('administer calendar framework') ? TRUE : FALSE,
       '#default_value' => variable_get('calendar_framework_' . $lang . '_calendar', 'default'),
     );
     
