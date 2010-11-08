@@ -1,0 +1,87 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Implements necessary hooks of Calendar Framework module, to support Islamic Calendar.
+ */
+
+/**
+ * Implements hook_calendar_info().
+ */
+function calendar_islamic_calendar_info() {
+  $calendar = array();
+
+  $calendar['islamic'] = array(
+    'name' => t('Islamic (Lunar Hijri)'),
+    'format callback' => 'calendar_islamic_formatter',
+    'convert callback' => 'calendar_islamic_converter',
+    'config callback' => 'calendar_islamic_admin_form',
+  );
+
+  return $calendar;
+}
+
+
+/**
+ * Form callback for Islamic calendar administration.
+ *
+ * @param $config
+ *   Calendar specific config options.
+ *
+ * @todo IMPLEMENT!
+ */
+function calendar_islamic_admin_form($config) {
+  $form = array();
+
+  // TODO: IMPLEMENT.
+
+  return $form;
+}
+
+/**
+ * Validation callback for Islamic calendar administration form.
+ *
+ * @todo IMPLEMENT!
+ */
+function calendar_islamic_admin_form_validate($form, &$form_state) {
+  // TODO: IMPLEMENT.
+}
+
+
+/**
+ * Islamic calendar date formatter callback.
+ *
+ * @param $timestamp
+ *   Unix timestamp to be formatted. 
+ *   The proper timezone value has been added by the native format_date().
+ * @param $type
+ *   The format to use. Can be "small", "medium" or "large" for the preconfigured
+ *   date formats. If "custom" is specified, then $format is required as well.
+ * @param $format
+ *   PHP date() function format string.
+ * @param $langcode
+ *   Optional language code to translate to a language other than the default.
+ * @param $calendar
+ *   A copy of calendar information.
+ *
+ * @return
+ *   The formatted date or FALSE otherwise.
+ *
+ * @see format_date()
+ */
+function calendar_islamic_formatter($timestamp, $type, $format, $langcode, $calendar) {
+  // TODO: IMPLEMENT!
+  return FALSE;
+}
+
+
+/**
+ * Jalali calendar date converter callback.
+ *
+ * @todo IMPLEMENT!
+ */
+function calendar_islamic_converter() {
+  return FALSE;
+}
+

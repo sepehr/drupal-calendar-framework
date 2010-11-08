@@ -1,0 +1,6 @@
+; $Id$
+name = "Islamic Calendar"
+description = "Islamic calendar (Lunar Hijri) support for Calendar Framework."
+core = 6.x
+package = "Calendar Framework"
+dependencies[] = calendar_framework

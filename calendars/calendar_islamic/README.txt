@@ -1,6 +1,6 @@
 Description
 ===========
-Jalali calendar (Solar Hijri) support for the Calendar Framework.
+Islamic calendar (Lunar Hijri) support for the Calendar Framework.
 
 Author and Maintainer
 =====================
