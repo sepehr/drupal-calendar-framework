@@ -61,9 +61,9 @@ function calendar_framework_form_alter(&$form, $form_state, $form_id) {
     
     // Setting callbacks.
     // TODO: Fix / Implement.
-    $form['#theme'] = 'calendar_framework_languages_overview_form';
-    $form['#submit'][] = 'calendar_framework_languages_overview_form_submit';
-    $form['#validate'][] = 'calendar_framework_languages_overview_form_validate';
+#    $form['#theme'] = 'calendar_framework_languages_overview_form';
+#    $form['#submit'][] = 'calendar_framework_languages_overview_form_submit';
+#    $form['#validate'][] = 'calendar_framework_languages_overview_form_validate';
   }
 
   dpm($form);
