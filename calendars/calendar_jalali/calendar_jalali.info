@@ -1,0 +1,6 @@
+; $Id$
+name = "Jalali Calendar"
+description = "Jalali calendar for Calendar Framework."
+core = 6.x
+package = "Calendar Framework"
+dependencies[] = calendar_framework
