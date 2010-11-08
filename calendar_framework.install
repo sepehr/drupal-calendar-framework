@@ -12,7 +12,7 @@
 function calendar_framework_enable() {
   // Include helpers.
   module_load_include('inc', 'calendar_framework');
-  
+
   // I know, I'm talking too much!
   $notice = t('Also notice that you need to make <em>patch target files</em> writable for webserver (0646) or you cannot patch them via the web interface of these modules.');
   $warning = t('Even though the <a href="!link">Calendar Framework</a> module is now enabled, it is useless till you properly apply the patch.',
@@ -26,7 +26,7 @@ function calendar_framework_enable() {
       '!patchmanager' => module_exists('patch_manager') ? url('admin/build/patch') : 'http://drupal.org/project/patch_manager',
     )
   );
-  
+
   if (!_calendar_framework_patch_applied()) {
     drupal_set_message($warning, 'warning');
     drupal_set_message($advice, 'warning');
@@ -50,10 +50,10 @@ function calendar_framework_install() {
   if (module_exists('patch_manager')) {
     // Include helpers.
     module_load_include('inc', 'calendar_framework');
-    
+
     // Get proper translator function.
     $t = get_t();
-    
+
     // Introduce the patch to patch_manager.module.
     if(_calendar_framework_patch_manager_insert()) {
       // Set the proper message.
@@ -85,10 +85,10 @@ function calendar_framework_uninstall() {
   // Module API is not available at this point. Using
   // db_query() and LIKE is un-encouraged. So, load the API.
   drupal_load('module', 'calendar_framework');
-  
+
   // Also include module helpers.
   module_load_include('inc', 'calendar_framework');
-  
+
   // Remove all calendars settings.
   $calendars = calendar_framework_calendars();
   foreach ($calendars as $identifer => $info) {
@@ -105,10 +105,10 @@ function calendar_framework_uninstall() {
  */
 function calendar_framework_requirements($phase) {
   global $base_url;
-  
+
   // Include helpers.
   module_load_include('inc', 'calendar_framework');
-    
+
   $t = get_t();
   $requirements = array();
   $patch_info = _calendar_framework_patch_info();

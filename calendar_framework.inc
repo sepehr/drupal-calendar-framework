@@ -51,11 +51,11 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
   if (!module_exists('patch_manager')) {
     return;
   }
-  
+
   global $user;
   $t = get_t();
   $patch_info = _calendar_framework_patch_info();
-  
+
   // Copy the patch to Drupal files directory,
   // This way the file could be seen by CCK 
   // filefield. Sorry for the suppression load mess!
@@ -69,10 +69,10 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
 
     return FALSE;
   }
-  
+
   // Oh, I wish I could automate eth!
   // chmod($patch_info['target'], 0646);
-  
+
   // Create the patch file.
   $file = new stdClass();
   $file->list = 1;
@@ -88,8 +88,8 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
   // Save the patch file.
   // Oh, we miss D7 file_save().
   drupal_write_record('files', $file);
-  $file->fid = db_result(db_query("SELECT fid FROM {files} WHERE filepath = '%s'", $file->filepath));        
-	
+  $file->fid = db_result(db_query("SELECT fid FROM {files} WHERE filepath = '%s'", $file->filepath));
+  
   // Create the patch node.
   $patch = new stdClass();
   $patch->type = 'patch';
@@ -98,7 +98,7 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
   $patch->title = $t('Calendar Framework common.inc patch for core');
   $patch->body = $t('Drupal core common.inc expansion to support hook_format_date() implementations.');
   $patch->field_module[0]['value'] = 'core';
-  
+
   // Attach the patch file to the node.
   $patch->field_patch[0] = array(
 		'fid' => $file->fid,
@@ -109,12 +109,12 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
 		'mimetype' => $file->filemime,
 		'list' => 1,
 	);
-  
+
   // Save the patch node.
   content_presave($patch); 
   node_save($patch);
   content_insert($patch);
-  
+
   return TRUE;
 }
 
@@ -131,7 +131,6 @@ function _calendar_framework_patch_manager_delete() {
             FROM {files} f
             LEFT JOIN {content_type_patch} ctp ON f.fid = ctp.field_patch_fid
             WHERE f.filepath = '%s'";
-            
   $nid = db_result(db_query($query, $path));
   node_delete($nid);   
 }
@@ -158,11 +157,11 @@ function _calendar_framework_patch_info($type = 'all') {
     'path' => drupal_get_path('module', 'calendar_framework') . '/patch/',
     'fingerprint' => 'foreach (module_implements(\'format_date\') as $module)',
   );
-  
+
   switch ($type) {
     case 'all':
       return $info;
-    
+
     default:
       return $info[$type];
   }

@@ -7,6 +7,13 @@
  */
 
 /**
+ * Thanks to the crowd at developmentseed,
+ * There are patterns here which is inspired by the awesome SMS Framework.
+ *
+ * @see http://drupal.org/project/smsframework
+ */
+
+/**
  * Implements hook_perm().
  */
 function calendar_framework_perm() {
@@ -27,7 +34,7 @@ function calendar_framework_init() {
  */
 function calendar_framework_menu() {
   $items = array();
-  
+
   $items['admin/settings/date-time/calendars'] = array(
     'title' => 'Calendars',
     'description' => 'Configuration options for available calendars.',
@@ -38,7 +45,7 @@ function calendar_framework_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 3,
   );
-  
+
   $items['admin/settings/date-time/calendars/%'] = array(
     'title callback' => 'calendar_framework_calendar_title',
     'title arguments' => array(4),
@@ -48,7 +55,7 @@ function calendar_framework_menu() {
     'file' => 'calendar_framework.admin.inc',
     'type' => MENU_CALLBACK,
   );
-  
+
   return $items;
 }
 
@@ -118,7 +125,7 @@ function calendar_framework_format_date($timestamp, $type, $format, $langcode) {
   if (!isset($calendar['format callback']) || !function_exists($calendar['format callback'])) {
     return FALSE;
   }
-  
+
   return $calendar['format callback']($timestamp, $type, $format, $langcode, $calendar);
 }
 
@@ -141,10 +148,10 @@ function calendar_framework_theme() {
  *
  * @param $op
  *   The format of return list. Could be:
- *     - calendar: Returns information about calendar identified by $identifier.
- *     - calendars: Returns a list of all available calendar informations.
- *     - name: Return the name of a calendar identified by $identifier.
- *     - names: Returns a list of all available calendar names.
+ *   - calendar: Returns information about calendar identified by $identifier.
+ *   - calendars: Returns a list of all available calendar informations.
+ *   - name: Return the name of a calendar identified by $identifier.
+ *   - names: Returns a list of all available calendar names.
  * @param $identifier
  *   A calendar identifier to filter the results.
  *
@@ -159,17 +166,16 @@ function calendar_framework_calendars($op = 'calendars', $identifier = NULL) {
   switch ($op) {
     case 'calendars':
       return $calendars;
-    
+
     case 'calendar':
         return is_array($calendars[$identifier]) ? array_merge($calendars[$identifier], array('identifier' => $identifier)) : NULL;
-      
+
     case 'names':
       return $names;
-      
+
     case 'name':
       return $names[$identifier];
   }
-  
 }
 
 
@@ -182,7 +188,7 @@ function calendar_framework_calendars($op = 'calendars', $identifier = NULL) {
 function _calendar_framework_calendars_build() {
   $names = array();
   $calendars = array();
-  
+
   $calendars_defined = module_invoke_all('calendar_info');
   foreach ($calendars_defined as $identifier => $info) {
     $info['config'] = variable_get('calendar_framework_settings_' . $identifier, '');    

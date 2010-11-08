@@ -15,12 +15,11 @@ function calendar_gregorian_calendar_info() {
   $calendar['gregorian'] = array(
     'name' => t('Gregorian'),
     'format callback' => 'calendar_gregorian_formatter',
-    'convert callback' => FALSE,
-    'admin form' => 'calendar_gregorian_admin_form',
   );
   
   return $calendar;
 }
+
 
 /**
  * Gregorian calendar date formatter callback.
