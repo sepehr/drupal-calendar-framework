@@ -84,7 +84,7 @@ function calendar_framework_menu() {
  * @return
  *   Calendar menu title.
  *
- * @ingroup calendar_framework_menu_callbacks
+ * @ingroup title_callback
  */
 function calendar_framework_calendar_title($identifier) {
   return sprintf('%s Calendar', calendar_framework_calendars('name', $identifier));
@@ -294,6 +294,11 @@ function _calendar_framework_build() {
 
   $calendars_defined = module_invoke_all('calendar_info');
   foreach ($calendars_defined as $identifier => $info) {
+    // Skip lazy modules without a format callback.
+    if (!isset($info['format callback']) || !function_exists($info['format callback'])) {
+      continue;
+    }
+    
     $info['config'] = variable_get('calendar_framework_settings_' . $identifier, '');    
     $calendars[$identifier] = $info;
     $names[$identifier] = $info['name'];     
