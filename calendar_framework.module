@@ -124,7 +124,7 @@ function calendar_framework_patch() {
  * This is a temporary hook implementation which employs a procedural concept of 
  * Factory design pattern until we all get a better format_date() function at Drupal core. 
  * Till those days we need to patch the includes/common.inc file to provide 
- * the ability to implement hook_format_fate().
+ * the ability to implement hook_format_date().
  *
  * @param $timestamp
  *   Unix timestamp to be formatted. 
@@ -149,12 +149,6 @@ function calendar_framework_patch() {
 function calendar_framework_format_date($timestamp, $type, $format, $langcode) {
   // Get the best-fit calendar for current user and language.
   $calendar = _calendar_framework_select();
-
-  // Skip the process,
-  // if the default calendar has not implemented a formatter callback.
-  if (!isset($calendar['format callback']) || !function_exists($calendar['format callback'])) {
-    return FALSE;
-  }
 
   return $calendar['format callback']($timestamp, $type, $format, $langcode, $calendar);
 }
