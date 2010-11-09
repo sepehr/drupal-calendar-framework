@@ -61,6 +61,8 @@ function calendar_framework_calendars_form() {
 
 /**
  * Form submission callback.
+ *
+ * @ingroup form_submit
  */
 function calendar_framework_calendars_form_submit($form, &$form_state) {
   if ($form_state['values']['default_calendar']) {
@@ -71,15 +73,17 @@ function calendar_framework_calendars_form_submit($form, &$form_state) {
 
 
 /**
- * Calendar Framework admin form themer.
+ * Theme callback for Calendar Framework admin form.
  *
  * @param $form
  *   Admin form array.
+ *
+ * @ingroup form_theme
  */
 function theme_calendar_framework_calendars_form($form) {
   $rows = array();
 
-  // Theming site-wide options.
+  // Set form table rows.
   foreach ($form['sitewide'] as $name => $element) {
     if (!isset($element['_id']) || !is_array($element['_id'])) {
       continue;
@@ -153,6 +157,8 @@ function calendar_framework_calendar_form(&$form_state, $identifier) {
 
 /**
  * Form validation callback for a calendar admin settings.
+ *
+ * @ingroup form_validate
  */
 function calendar_framework_calendar_form_validate($form, &$form_state) {
   // Pass to calendar form validator.
@@ -165,6 +171,8 @@ function calendar_framework_calendar_form_validate($form, &$form_state) {
 
 /**
  * Form submission callback for a calendar admin settings.
+ *
+ * @ingroup form_submit
  */
 function calendar_framework_calendar_form_submit($form, &$form_state) {
   $calendar = $form_state['values']['calendar'];
@@ -179,6 +187,69 @@ function calendar_framework_calendar_form_submit($form, &$form_state) {
   );
   variable_set('calendar_framework_settings_' . $calendar['identifier'], $form_state['values']);
 
-  drupal_set_message(t('Configuration options has been saved.'));
+  drupal_set_message(t('Calendar configuration has been saved.'));
+}
+
+
+/**
+ * Theme callback for Locale language overview form.
+ *
+ * @param $form
+ *   Language overview form array.
+ *
+ * @ingroup form_theme
+ */
+function theme_calendar_framework_languages_overview_form($form) {
+  $rows = array();
+  $default = language_default();
+  
+  // Set form table rows.
+  foreach ($form['name'] as $name => $element) {
+    // Skip form attributes.
+    if (!is_array($element) || !element_child($name)) {
+      continue;
+    }
+    
+    // Make the default language checkbox disabled.
+    if ($name == $default->language) {
+      $form['enabled'][$name]['#attributes']['disabled'] = 'disabled';
+    }
+
+    // Set form table header.
+    $rows[] = array(
+      array(
+        'data' => drupal_render($form['enabled'][$name]),
+        'align' => 'center'
+      ),
+      check_plain($name),
+      '<strong>' . drupal_render($form['name'][$name]) . '</strong>',
+      drupal_render($form['native'][$name]),
+      drupal_render($form['direction'][$name]),
+      drupal_render($form['site_default'][$name]),
+      drupal_render($form['admin_language'][$name]),
+      drupal_render($form['calendar_framework_languages'][$name]),
+      drupal_render($form['weight'][$name]),
+      l(t('edit'), 'admin/settings/language/edit/'. $name) . (($name != 'en' && $name != $default->language) ? ' ' . l(t('delete'), 'admin/settings/language/delete/' . $name) : ''),
+    );
+  }
+  
+  // Set form table header.
+  $header = array(
+    t('Enabled'),
+    t('Code'),
+    t('English name'),
+    t('Native name'),
+    t('Direction'),
+    t('Default'),
+    t('Admin'),
+    t('Calendar'),
+    t('Weight'),
+    array('data' => t('Operations')),
+  );
+
+  // Let it go!
+  $output = theme('table', $header, $rows);
+  $output .= drupal_render($form);
+  return $output;
 }
 

@@ -8,13 +8,15 @@
 
 /**
  * Thanks to the crowd at developmentseed,
- * There are patterns here which is inspired by the awesome SMS Framework.
+ * There are some patterns here inspired by the SMS Framework.
  *
  * @see http://drupal.org/project/smsframework
  */
 
 /**
  * Implements hook_perm().
+ *
+ * @ingroup hook_implementation
  */
 function calendar_framework_perm() {
   return array('administer calendar framework');
@@ -23,6 +25,8 @@ function calendar_framework_perm() {
 
 /**
  * Implements hook_init().
+ *
+ * @ingroup hook_implementation
  */
 function calendar_framework_init() {
   // Include helpers.
@@ -32,46 +36,16 @@ function calendar_framework_init() {
     drupal_set_message(t('Even though the <a href="!link">Calendar Framework</a> module is enabled, it is useless till you properly apply the patch.',
       array('!link' => url('admin/settings/date-time/calendars'))
     ), 'warning');
+    
     drupal_set_message(t('And you are going to get this message till you apply the patch or disable the module.'), 'warning');
   }
 }
 
 
 /**
- * Implements hook_form_alter().
- */
-function calendar_framework_form_alter(&$form, $form_state, $form_id) {
-  if ($form_id != 'locale_languages_overview_form') {
-    return;
-  }
-  
-  // Get a list system calendar names.
-  $calendars = calendar_framework_calendars('names');
-  
-  // For each language add a dropdown list,
-  // to let the user choose desired calendar.
-  $form['calendar_framework_lang_calendar'] = array('#tree' => TRUE);
-  foreach ($form['enabled']['#options'] as $lang) {
-    $form['calendar_framework_lang_calendar'][$lang] = array(
-      '#type' => 'select',
-      '#options' => $calendars += array('default' => t('Default Calendar')),
-      '#access' => user_access('administer calendar framework') ? TRUE : FALSE,
-      '#default_value' => variable_get('calendar_framework_' . $lang . '_calendar', 'default'),
-    );
-    
-    // Setting callbacks.
-    // TODO: Fix / Implement.
-#    $form['#theme'] = 'calendar_framework_languages_overview_form';
-#    $form['#submit'][] = 'calendar_framework_languages_overview_form_submit';
-#    $form['#validate'][] = 'calendar_framework_languages_overview_form_validate';
-  }
-
-  dpm($form);
-}
-
-
-/**
  * Implements hook_menu().
+ *
+ * @ingroup hook_implementation
  */
 function calendar_framework_menu() {
   $items = array();
@@ -109,6 +83,8 @@ function calendar_framework_menu() {
  *
  * @return
  *   Calendar menu title.
+ *
+ * @ingroup calendar_framework_menu_callbacks
  */
 function calendar_framework_calendar_title($identifier) {
   return sprintf('%s Calendar', calendar_framework_calendars('name', $identifier));
@@ -117,6 +93,8 @@ function calendar_framework_calendar_title($identifier) {
 
 /**
  * Implements hook_patch().
+ *
+ * @ingroup hook_implementation
  *
  * @see http://drupal.org/project/patchdoq
  * @see http://doques.net/node/367
@@ -155,12 +133,14 @@ function calendar_framework_patch() {
  * @return
  *   The formatted date or FALSE otherwise.
  *
+ * @ingroup hook_implementation
+ *
  * @see format_date()
  * @see calendar_framework_patch()
  * @see patch/common.inc-format_date.d6.patch
  */
 function calendar_framework_format_date($timestamp, $type, $format, $langcode) {
-  $calendar = calendar_framework_default_calendar();
+  $calendar = calendar_framework_default();
 
   // Skip the process, if the default calendar has not implemented a formatter callback.
   if (!isset($calendar['format callback']) || !function_exists($calendar['format callback'])) {
@@ -172,11 +152,67 @@ function calendar_framework_format_date($timestamp, $type, $format, $langcode) {
 
 
 /**
+ * Implements hook_form_alter().
+ *
+ * Alters locale_languages_overview_form to inject calendar options.
+ *
+ * @ingroup hook_implementation
+ */
+function calendar_framework_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id != 'locale_languages_overview_form') {
+    return;
+  }
+  
+  // Get a list system calendar names.
+  $calendars = calendar_framework_calendars('names');
+  
+  // For each language add a dropdown list,
+  // to let the user choose desired calendar.
+  $form['calendar_framework_languages'] = array(
+    '#tree' => TRUE,
+  );
+  
+  foreach (array_keys($form['enabled']['#options']) as $lang) {
+    $form['calendar_framework_languages'][$lang] = array(
+      '#type' => 'select',
+      '#options' => $calendars += array('default' => t('Default Calendar')),
+      '#access' => user_access('administer calendar framework') ? TRUE : FALSE,
+      '#default_value' => variable_get('calendar_framework_' . $lang . '_calendar', 'default'),
+    );
+  }
+      
+  // Override the default themer.
+  $form['#theme'] = 'calendar_framework_languages_overview_form';
+  
+  // And append submission callbacks.
+  $form['#submit'][] = 'calendar_framework_languages_overview_form_submit';
+}
+
+
+/**
+ * Submission callback for Locale language overview form.
+ *
+ * @ingroup form_submit
+ */
+function calendar_framework_languages_overview_form_submit($form, &$form_state) {
+  foreach ($form_state['values']['calendar_framework_languages'] as $lang => $calendar_choice) {
+    variable_set('calendar_framework_' . $lang . '_calendar', $calendar_choice);
+  }
+}
+
+
+/**
  * Implements hook_theme().
+ *
+ * @ingroup hook_implementation
  */
 function calendar_framework_theme() {
   return array(
     'calendar_framework_calendars_form' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'calendar_framework.admin.inc',
+    ),
+    'calendar_framework_languages_overview_form' => array(
       'arguments' => array('form' => NULL),
       'file' => 'calendar_framework.admin.inc',
     ),
@@ -193,30 +229,50 @@ function calendar_framework_theme() {
  *   - calendars: Returns a list of all available calendar informations.
  *   - name: Return the name of a calendar identified by $identifier.
  *   - names: Returns a list of all available calendar names.
+ *   - identifiers: Returns a list of available calendar identifiers.
  * @param $identifier
  *   A calendar identifier to filter the results.
  *
  * @return
  *   An array of calendars or a single calendar.
  *
- * @see _calendar_framework_calendars_build()
+ * @ingroup module_api
+ *
+ * @see _calendar_framework_build()
  */
 function calendar_framework_calendars($op = 'calendars', $identifier = NULL) {
-  list($calendars, $names) = _calendar_framework_calendars_build();
+  list($calendars, $names) = _calendar_framework_build();
 
   switch ($op) {
     case 'calendars':
       return $calendars;
 
     case 'calendar':
-        return is_array($calendars[$identifier]) ? array_merge($calendars[$identifier], array('identifier' => $identifier)) : NULL;
+        return is_array($calendars[$identifier]) ? 
+          array_merge($calendars[$identifier], array('identifier' => $identifier)) : NULL;
 
     case 'names':
       return $names;
 
     case 'name':
       return $names[$identifier];
+    
+    case 'identifiers':
+      return array_keys($calendars);
   }
+}
+
+
+/**
+ * API function to get current default calendar.
+ *
+ * @return
+ *   An array of default calendar information.
+ *
+ * @ingroup module_api
+ */
+function calendar_framework_default() {
+  return calendar_framework_calendars('calendar', variable_get('calendar_framework_default_calendar', 'gregorian'));
 }
 
 
@@ -225,8 +281,10 @@ function calendar_framework_calendars($op = 'calendars', $identifier = NULL) {
  *
  * @return
  *   An array of available calendars.
+ *
+ * @ingroup module_helper
  */
-function _calendar_framework_calendars_build() {
+function _calendar_framework_build() {
   $names = array();
   $calendars = array();
 
@@ -238,16 +296,5 @@ function _calendar_framework_calendars_build() {
   }
 
   return array($calendars, $names);
-}
-
-
-/**
- * API function to get current default calendar.
- *
- * @return
- *   An array of default calendar information.
- */
-function calendar_framework_default_calendar() {
-  return calendar_framework_calendars('calendar', variable_get('calendar_framework_default_calendar', 'gregorian'));
 }
 
