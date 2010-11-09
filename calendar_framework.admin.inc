@@ -186,8 +186,11 @@ function calendar_framework_calendar_form_submit($form, &$form_state) {
     $form_state['values']['form_build_id']
   );
   variable_set('calendar_framework_settings_' . $calendar['identifier'], $form_state['values']);
-
-  drupal_set_message(t('Calendar configuration has been saved.'));
+  
+  $form_state['redirect'] = 'admin/settings/date-time/calendars';
+  drupal_set_message(t('Configuration for <em>@calendar</em> has been successfully saved.',
+    array('@calendar' => calendar_framework_calendar_title($calendar['identifier']))
+  ));
 }
 
 
