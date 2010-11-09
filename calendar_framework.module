@@ -140,6 +140,10 @@ function calendar_framework_patch() {
  * @see patch/common.inc-format_date.d6.patch
  */
 function calendar_framework_format_date($timestamp, $type, $format, $langcode) {
+  // TODO: Replace the following line with a 
+  // call to calendar_framework_select() which will 
+  // be designed to choose the proper calendar
+  // based on the current system situation.
   $calendar = calendar_framework_default();
 
   // Skip the process, if the default calendar has not implemented a formatter callback.
