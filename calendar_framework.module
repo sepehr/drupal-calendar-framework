@@ -19,7 +19,10 @@
  * @ingroup hook_implementation
  */
 function calendar_framework_perm() {
-  return array('administer calendar framework');
+  return array(
+    'select different calendar',
+    'administer calendar framework',
+  );
 }
 
 
@@ -156,6 +159,43 @@ function calendar_framework_format_date($timestamp, $type, $format, $langcode) {
 
 
 /**
+ * Implements hook_user().
+ *
+ * Adds a user specific calendar configuration.
+ *
+ * @ingroup hook_implementation
+ */
+function calendar_framework_user($op, &$edit, &$account, $category = NULL) {
+  if ($op != 'form' || $category != 'account' || !user_access('select different calendar')) {
+    return;
+  }
+  
+  $form = array();
+  $calendars = calendar_framework_calendars('names');
+  
+  if (!isset($form['timezone'])) {
+    $form['timezone'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Locale settings'),
+      '#collapsible' => TRUE,
+      '#collapsed' => FALSE,
+    );
+  }
+  
+  $form['timezone']['calendar'] = array(
+    '#type' => 'select',
+    '#title' => t('Default calendar'),
+    '#description' => t('Selecting a different calendar will change all dates across the site.'),
+    '#access' => user_access('select different calendar'),
+    '#options' => $calendars += array('default' => t('Site default calendar')),
+    '#default_value' => $account->calendar,
+  );
+  
+  return $form;
+}
+
+
+/**
  * Implements hook_form_alter().
  *
  * Alters locale_languages_overview_form to inject calendar options.
@@ -179,8 +219,8 @@ function calendar_framework_form_alter(&$form, $form_state, $form_id) {
   foreach (array_keys($form['enabled']['#options']) as $lang) {
     $form['calendar_framework_languages'][$lang] = array(
       '#type' => 'select',
+      '#access' => user_access('administer calendar framework'),
       '#options' => $calendars += array('default' => t('Default Calendar')),
-      '#access' => user_access('administer calendar framework') ? TRUE : FALSE,
       '#default_value' => variable_get('calendar_framework_' . $lang . '_calendar', 'default'),
     );
   }
