@@ -169,22 +169,13 @@ function calendar_framework_user($op, &$edit, &$account, $category = NULL) {
   $form = array();
   $calendars = calendar_framework_calendars('names');
   
-  if (!isset($form['timezone'])) {
-    $form['timezone'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Locale settings'),
-      '#collapsible' => TRUE,
-      '#collapsed' => FALSE,
-    );
-  }
-  
   $form['timezone']['calendar'] = array(
     '#type' => 'select',
     '#title' => t('Default calendar'),
     '#description' => t('Selecting a different calendar will change all dates across the site.'),
     '#access' => user_access('select different calendar'),
     '#options' => $calendars += array('default' => t('Site default calendar')),
-    '#default_value' => $account->calendar,
+    '#default_value' => $account->calendar ? $account->calendar : 'default',
   );
   
   return $form;
@@ -330,12 +321,12 @@ function _calendar_framework_select() {
   global $language;
   
   // Calendar per user.
-  if (isset($user->calendar) && user_access('select different calendar')) {
+  if (isset($user->calendar) && $user->calendar != 'default' && user_access('select different calendar')) {
     return calendar_framework_calendars('calendar', $user->calendar);
   }
   
   // Calendar per language.
-  if ($calendar = variable_get('calendar_framework_' . $language->code . '_calendar', FALSE)) {
+  if ($calendar = variable_get('calendar_framework_' . $language->language . '_calendar', FALSE)) {
     return ($calendar == 'default') ? calendar_framework_default() : calendar_framework_calendars('calendar', $calendar);
   }
   
@@ -369,4 +360,46 @@ function _calendar_framework_build() {
   return array($calendars, $names);
 }
 
+
+/**
+ * Implements hook_calendar_info().
+ *
+ * So we have a default fake Gregorian calendar.
+ */
+function calendar_framework_calendar_info() {
+  $calendar = array();
+  
+  $calendar['gregorian'] = array(
+    'name' => t('Gregorian'),
+    'format callback' => 'calendar_framework_gregorian_formatter',
+  );
+  
+  return $calendar;
+}
+
+
+/**
+ * Gregorian calendar date formatter callback.
+ *
+ * @param $timestamp
+ *   Unix timestamp to be formatted. 
+ *   The proper timezone value has been added by the native format_date().
+ * @param $type
+ *   The format to use. Can be "small", "medium" or "large" for the preconfigured
+ *   date formats. If "custom" is specified, then $format is required as well.
+ * @param $format
+ *   PHP date() function format string.
+ * @param $langcode
+ *   Optional language code to translate to a language other than the default.
+ * @param $calendar
+ *   A copy of calendar information.
+ *
+ * @return
+ *   The formatted date or FALSE otherwise.
+ *
+ * @see format_date()
+ */
+function calendar_framework_gregorian_formatter($timestamp, $type, $format, $langcode, $calendar) {
+  return FALSE;
+}
 
