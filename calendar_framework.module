@@ -321,6 +321,30 @@ function calendar_framework_default() {
 
 
 /**
+ * Helper function to select the proper
+ * calendar based on current user and language.
+ *
+ * @return
+ *   Calendar identifier.
+ *
+ * @ingroup module_helper
+ */
+function _calendar_framework_select() {
+  global $user;
+  global $language;
+  
+  if (isset($user->calendar) && user_access('select different calendar')) {
+    return $user->calendar;
+  }
+  
+  if ($calendar = variable_get('calendar_framework_' . $language->code . '_calendar', FALSE)) {
+    return ($calendar == 'default') ? calendar_framework_default() : $calendar;
+  }
+  
+  return calendar_framework_default();
+}
+
+/**
  * Helper function to build a list of defined calendars.
  *
  * @return
@@ -346,4 +370,5 @@ function _calendar_framework_build() {
 
   return array($calendars, $names);
 }
+
 
