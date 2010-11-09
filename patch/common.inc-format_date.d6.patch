@@ -10,7 +10,7 @@ index 2ca8c72..ce8fef8 100644
 +    // date.module implements a date_format_date() function, skip it.
 +    if ($module != 'date') {
 +      $function = $module . '_format_date';
-+      $date = $function($timestamp, $type, $format, $langcode);
++      $date = $function($timestamp, $format, $timezone, $langcode);
 +
 +      if ($date) {
 +        return $date;
