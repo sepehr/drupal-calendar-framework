@@ -371,7 +371,7 @@ function calendar_framework_calendar_info() {
   
   $calendar['gregorian'] = array(
     'name' => t('Gregorian'),
-    'format callback' => 'calendar_framework_gregorian_formatter',
+    'format callback' => 'calendar_gregorian_formatter',
   );
   
   return $calendar;
@@ -399,7 +399,19 @@ function calendar_framework_calendar_info() {
  *
  * @see format_date()
  */
-function calendar_framework_gregorian_formatter($timestamp, $type, $format, $langcode, $calendar) {
+function calendar_gregorian_formatter($timestamp, $type, $format, $langcode, $calendar) {
   return FALSE;
+}
+
+
+/**
+ * Calendar month days helper.
+ *
+ * @return
+ *   An array of ordered numbers
+ *   corresponding to month length of days.
+ */
+function calendar_gregorian_month_days() {
+  return array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
 }
 
