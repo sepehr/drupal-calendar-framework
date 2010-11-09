@@ -147,9 +147,9 @@ function calendar_framework_patch() {
  * @see patch/common.inc-format_date.d6.patch
  */
 function calendar_framework_format_date($timestamp, $type, $format, $langcode) {
-  // Get the best-fit calendar for current user and language.
+  // Get the best-fit calendar for current 
+  // user/language and call its formatter callback.
   $calendar = _calendar_framework_select();
-
   return $calendar['format callback']($timestamp, $type, $format, $langcode, $calendar);
 }
 
