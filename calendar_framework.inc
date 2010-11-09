@@ -95,19 +95,19 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
   $patch->type = 'patch';
   $patch->language = 'en';
   $patch->uid = $user->uid;
-  $patch->title = $t('Calendar Framework common.inc patch for core');
-  $patch->body = $t('Drupal core common.inc expansion to support hook_format_date() implementations.');
+  $patch->title = $patch_info['title'];
+  $patch->body = $patch_info['description'];
   $patch->field_module[0]['value'] = 'core';
 
   // Attach the patch file to the node.
   $patch->field_patch[0] = array(
+    'list' => 1,
 		'fid' => $file->fid,
 		'title' => $file->filename,
 		'filename' => $file->filename,
 		'filepath' => $file->filepath,
 		'filesize' => $file->filesize,
 		'mimetype' => $file->filemime,
-		'list' => 1,
 	);
 
   // Save the patch node.
@@ -115,6 +115,7 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
   node_save($patch);
   content_insert($patch);
 
+  // Make 'em happy!
   return TRUE;
 }
 
@@ -145,17 +146,20 @@ function _calendar_framework_patch_manager_delete() {
  *   - name: Returns patch file name.
  *   - path: Returns patch file path.
  *   - target: Returns patch file target.
- *   - finger: Returns patch fingerprint to check whether the patch is applied or not.
+ *   - fingerprint: Returns patch fingerprint to check whether the patch is applied or not.
  *
  * @return
  *   Either partial or full Patch info.
  */
 function _calendar_framework_patch_info($type = 'all') {
+  $t = get_t();
   $info = array(
     'target' => 'includes/common.inc',
     'name' => 'common.inc-format_date.d6.patch',
     'path' => drupal_get_path('module', 'calendar_framework') . '/patch/',
     'fingerprint' => 'foreach (module_implements(\'format_date\') as $module)',
+    'description' => $t('Drupal core common.inc expansion to support hook_format_date() implementations.'),
+    'title' => $t('Calendar Framework common.inc patch for core'),
   );
 
   switch ($type) {

@@ -103,11 +103,15 @@ function calendar_framework_calendar_title($identifier) {
  * @see http://doques.net/node/367
  */
 function calendar_framework_patch() {
+  // Include helpers.
+  module_load_include('inc', 'calendar_framework');
+  $patch_info = _calendar_framework_patch_info();
+  
   return array(
     'common.inc' => array(
-      'name' => t('Core common.inc patch'),
-      'description' => t('Drupal core common.inc expansion to support hook_format_date() implementations.'),
-      'file' => drupal_get_path('module', 'calendar_framework') . '/patch/common.inc-format_date.d6.patch',
+      'name' => $patch_info['title'],
+      'description' => $patch_info['description'],
+      'file' => $patch_info['path'] . $patch_info['name'],
       'patch arguments' => '-p0',
     ),
   );
@@ -331,12 +335,14 @@ function _calendar_framework_select() {
   global $user;
   global $language;
   
+  // Calendar per user.
   if (isset($user->calendar) && user_access('select different calendar')) {
-    return $user->calendar;
+    return calendar_framework_calendars('calendar', $user->calendar);
   }
   
+  // Calendar per language.
   if ($calendar = variable_get('calendar_framework_' . $language->code . '_calendar', FALSE)) {
-    return ($calendar == 'default') ? calendar_framework_default() : $calendar;
+    return ($calendar == 'default') ? calendar_framework_default() : calendar_framework_calendars('calendar', $calendar);
   }
   
   return calendar_framework_default();
