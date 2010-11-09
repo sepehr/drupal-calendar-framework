@@ -129,9 +129,6 @@ function calendar_framework_patch() {
  * @param $timestamp
  *   Unix timestamp to be formatted. 
  *   Don't worry, the proper timezone value has been added to this by format_date().
- * @param $type
- *   The format to use. Can be "small", "medium" or "large" for the preconfigured
- *   date formats. If "custom" is specified, then $format is required as well.
  * @param $format
  *   PHP date() function format string.
  * @param $langcode
@@ -146,11 +143,11 @@ function calendar_framework_patch() {
  * @see calendar_framework_patch()
  * @see patch/common.inc-format_date.d6.patch
  */
-function calendar_framework_format_date($timestamp, $type, $format, $langcode) {
+function calendar_framework_format_date($timestamp, $format, $timezone, $langcode) {
   // Get the best-fit calendar for current 
   // user/language and call its formatter callback.
   $calendar = _calendar_framework_select();
-  return $calendar['format callback']($timestamp, $type, $format, $langcode, $calendar);
+  return $calendar['format callback']($timestamp, $format, $timezone, $langcode, $calendar);
 }
 
 
@@ -308,6 +305,63 @@ function calendar_framework_default() {
 
 
 /**
+ * API function for 3rdparty calendar framework modules.
+ *
+ * Modules formatter callbacks that does not define a particular
+ * format should pass the format to this API function, so the timestamp
+ * will get formatted by the default formatter.
+ *
+ * @param $timestamp
+ *   Unix timestamp to be formatted.
+ * @param $format
+ *   Date format as required by PHP date().
+ * @param $timezone
+ *   Time zone offset in seconds.
+ *
+ * @return
+ *   Formatted date based on the passed $format.
+ *
+ * @ingroup module_api
+ *
+ * @todo Pass it through the format_date() once it got improved.
+ */
+function calendar_framework_formatter_default($timestamp, $format, $timezone = 0) {
+  $date = '';
+  $max = strlen($format);
+  
+  for ($i = 0; $i < $max; $i++) {
+    $c = $format[$i];
+    if (strpos('AaDlM', $c) !== FALSE) {
+      $date .= t(gmdate($c, $timestamp), array(), $langcode);
+    }
+    elseif ($c == 'F') {
+      $date .= trim(t('!long-month-name '. gmdate($c, $timestamp), array('!long-month-name' => ''), $langcode));
+    }
+    elseif (strpos('BdgGhHiIjLmnsStTUwWYyz', $c) !== FALSE) {
+      $date .= gmdate($c, $timestamp);
+    }
+    elseif ($c == 'r') {
+      $date .= format_date($timestamp - $timezone, 'custom', 'D, d M Y H:i:s O', $timezone, $langcode);
+    }
+    elseif ($c == 'O') {
+      $date .= sprintf('%s%02d%02d', ($timezone < 0 ? '-' : '+'), abs($timezone / 3600), abs($timezone % 3600) / 60);
+    }
+    elseif ($c == 'Z') {
+      $date .= $timezone;
+    }
+    elseif ($c == '\\') {
+      $date .= $format[++$i];
+    }
+    else {
+      $date .= date($c, $timestamp);
+    }
+  }
+
+  return $date;
+}
+
+
+/**
  * Helper function to select the proper
  * calendar based on current user and language.
  *
@@ -364,7 +418,13 @@ function _calendar_framework_build() {
 /**
  * Implements hook_calendar_info().
  *
- * So we have a default fake Gregorian calendar.
+ * This is the calendar_gregorian.module built into the
+ * calendar_framework.module, So we got a default fake Gregorian calendar.
+ *
+ * @return
+ *   An array of Gregorian calendar information.
+ *
+ * @ingroup hook_implementation
  */
 function calendar_framework_calendar_info() {
   $calendar = array();
@@ -398,6 +458,8 @@ function calendar_framework_calendar_info() {
  *   The formatted date or FALSE otherwise.
  *
  * @see format_date()
+ *
+ * @ingroup calendar_format_callback
  */
 function calendar_gregorian_formatter($timestamp, $type, $format, $langcode, $calendar) {
   return FALSE;
@@ -408,8 +470,10 @@ function calendar_gregorian_formatter($timestamp, $type, $format, $langcode, $ca
  * Calendar month days helper.
  *
  * @return
- *   An array of ordered numbers
- *   corresponding to month length of days.
+ *   An array of ordered numbers corresponding
+ *   to a Gregorian year monthes length of days.
+ *
+ * @ingroup calendar_helper
  */
 function calendar_gregorian_month_days() {
   return array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
