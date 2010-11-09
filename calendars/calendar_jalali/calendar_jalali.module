@@ -3,20 +3,35 @@
 
 /**
  * @file
- * Implements necessary hooks of Calendar Framework module, to support Jalali Calendar.
+ * Implements necessary hooks & helpers to support Jalali Calendar.
  */
 
 /**
  * Implements hook_calendar_info().
+ *
+ * @ingroup hook_implementation
  */
 function calendar_jalali_calendar_info() {
   $calendar = array();
-
+  
+  // An array of calendar information,
+  // keyed by the calendar identifier.
   $calendar['jalali'] = array(
+    // Calendar name:
     'name' => t('Jalali (Solar Hijri)'),
-    'format callback' => 'calendar_jalali_formatter',
-    'convert callback' => 'calendar_jalali_converter',
+    // Administration form callback:
     'config callback' => 'calendar_jalali_admin_form',
+    // Date formatter callback:
+    'format callback' => 'calendar_jalali_formatter',
+    // Calendar convert callbacks:
+    'convert callbacks' => array(
+      'from gregorian' => 'calendar_jalali_convert',
+      'to gregorian' => 'calendar_jalali_convert_reverse',
+    ),
+    // Callbacks for calendar specifications:
+    'week days' => 'calendar_jalali_week_days',
+    'month days' => 'calendar_jalali_month_days',
+    'year months' => 'calendar_jalali_year_months',
   );
 
   return $calendar;
@@ -29,26 +44,56 @@ function calendar_jalali_calendar_info() {
  * @param $config
  *   Calendar specific config options.
  *
- * @todo IMPLEMENT!
+ * @ingroup forms
  */
 function calendar_jalali_admin_form($config) {
   $form = array();
 
-  // Test.
-  $form['calendar_jalali_test'] = array(
+  $form['calendar_jalali_translate_months'] = array(
     '#type' => 'checkbox',
-    '#title' => t('This is a test calendar specific option.'),
-    '#default_value' => $config['calendar_jalali_test'],
+    '#title' => t('Translate calendar month names and show the Persian representation.'),
+    '#description' => t('If checked, you also need to translate month names to Persian using the <a href="!link">translate interface</a>.',
+      array('!link' => url('admin/build/translate'))
+    ),
+    '#default_value' => $config['calendar_jalali_translate_months'],
+    '#return_value' => 1,
+  );
+  
+  $form['calendar_jalali_translate_weekdays'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Translate calendar weekday names and show the Persian representation.'),
+    '#description' => t('If checked, you also need to translate weekday names to Persian using the <a href="!link">translate interface</a>.',
+      array('!link' => url('admin/build/translate'))
+    ),
+    '#default_value' => $config['calendar_jalali_translate_weekdays'],
     '#return_value' => 1,
   );
 
+  $form['calendar_jalali_translate_numbers'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Replace numbers with their Persian representaion.'),
+    '#default_value' => $config['calendar_jalali_translate_numbers'],
+    '#return_value' => 1,
+  );
+  
+  $form['calendar_jalali_translate_meridiem'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Translate calendar Ante meridiem and Post meridiem values.'),
+    '#description' => t('If checked, you also need to translate Ante/Post meridiem to Persian using the <a href="!link">translate interface</a>.',
+      array('!link' => url('admin/build/translate'))
+    ),
+    '#default_value' => $config['calendar_jalali_translate_meridiem'],
+    '#return_value' => 1,
+  );
+  
   return $form;
 }
+
 
 /**
  * Validation callback for Jalali calendar administration form.
  *
- * @todo IMPLEMENT!
+ * @ingroup form_validate
  */
 function calendar_jalali_admin_form_validate($form, &$form_state) {
   // Test.
@@ -59,16 +104,152 @@ function calendar_jalali_admin_form_validate($form, &$form_state) {
 
 
 /**
+ * Jalali calendar date converter callback.
+ *
+ * Converts Gregorian to Jalali.
+ *
+ * @param $year
+ *   Gregorian year.
+ * @param $month
+ *   Gregorian month.
+ * @param $day
+ *   Gregorian day.
+ *
+ * @return
+ *   An array of Jalali date elements.
+ *   - year: Jalali year.
+ *   - month: Jalali month.
+ *   - day: Jalali day.
+ *
+ * @ingroup calendar_convert_callback
+ */
+function calendar_jalali_convert($year, $month, $day) {
+  $day = $day - 1;
+  $month = $month - 1;
+  $year = $year - 1600;
+  $jmonth_days = calendar_jalali_month_days();
+  $gmonth_days = calendar_gregorian_month_days();
+  $gday_no = 365 * $year + (int) (($year + 3) / 4) - (int) (($year + 99) / 100) + (int) (($year + 399) / 400);
+
+  for ($i = 0; $i < $month; ++$i) {
+    $gday_no += $gmonth_days[$i];
+  }
+
+  // Leap year / After february.
+  if ($month > 1 && (($year % 4 == 0 && $year % 100 != 0) || ( $year % 400 == 0))) {
+    ++$gday_no;
+  }
+
+  $gday_no += $day;
+  $jday_no = $gday_no - 79;
+
+  $j_np = (int) ($jday_no / 12053);
+  $jday_no %= 12053;
+
+  $jyear = 979 + 33 * $j_np + 4 * (int) ($jday_no / 1461);
+
+  $jday_no %= 1461;
+
+  if ($jday_no >= 366) {
+    $jyear += (int) (($jday_no-1) / 365);
+    $jday_no = ($jday_no-1) % 365;
+  }
+
+  for ($i = 0; $i < 11 && $jday_no >= $jmonth_days[$i]; ++$i) {
+    $jday_no -= $jmonth_days[$i];
+  }
+
+  return array($jyear, $i + 1, $jday_no + 1);
+}
+
+
+/**
+ * Jalali calendar reverse date converter callback.
+ *
+ * Converts Jalali to Gregorian.
+ *
+ * @param $year
+ *   Jalali year.
+ * @param $month
+ *   Jalali month.
+ * @param $day
+ *   Jalali day.
+ *
+ * @return
+ *   An array of Gregorian date elements.
+ *   - year: Gregorian year.
+ *   - month: Gregorian month.
+ *   - day: Gregorian day.
+ *
+ * @ingroup calendar_convert_callback
+ */
+function calendar_jalali_convert_reverse($year, $month, $day) {
+  $day = $day - 1;
+  $month = $month - 1;
+  $year = $year - 979;
+  $jmonth_days = calendar_jalali_month_days();
+  $gmonth_days = calendar_gregorian_month_days();
+  $jday_no = 365 * $year + (int) ($year / 33) * 8 + (int) (($year % 33 + 3) / 4);
+
+  for ($i = 0; $i < $month; ++$i) {
+    $jday_no += $jmonth_days[$i];
+  }
+
+  $jday_no += $day;
+  $gday_no = $jday_no + 79;
+
+  // 146097 = 365*400 + 400/4 - 400/100 + 400/400
+  $gyear = 1600 + 400 * (int) ($gday_no / 146097);
+  $gday_no = $gday_no % 146097;
+
+  $leap = true;
+  // 36525 = 365*100 + 100/4
+  if ($gday_no >= 36525) {
+    $gday_no--;
+
+    // 36524 = 365*100 + 100/4 - 100/100
+    $gyear += 100 * (int) ($gday_no / 36524);
+    $gday_no = $gday_no % 36524;
+
+    if ($gday_no >= 365) {
+      $gday_no++;
+    }
+    else {
+      $leap = false;
+    }
+  }
+
+  // 1461 = 365*4 + 4/4
+  $gyear += 4 * (int) ($gday_no / 1461); 
+  $gday_no %= 1461;
+
+  if ($gday_no >= 366) {
+    $leap = false;
+    $gday_no--;
+    $gyear += (int) ($gday_no / 365);
+    $gday_no = $gday_no % 365;
+  }
+
+  for ($i = 0; $gday_no >= $gmonth_days[$i] + ($i == 1 && $leap); $i++) {
+    $gday_no -= $gmonth_days[$i] + ($i == 1 && $leap);
+  }
+
+  return array($gyear, $i + 1, $gday_no + 1);
+}
+
+
+/**
  * Jalali calendar date formatter callback.
+ *
+ * {Calendar conversion is a just a pain!}
  *
  * @param $timestamp
  *   Unix timestamp to be formatted. 
- *   The proper timezone value has been added by the native format_date().
- * @param $type
- *   The format to use. Can be "small", "medium" or "large" for the preconfigured
- *   date formats. If "custom" is specified, then $format is required as well.
+ *   The proper $timezone value has been added by Drupal format_date().
  * @param $format
  *   PHP date() function format string.
+ * @param $timezone
+ *   Time zone offset in seconds.
  * @param $langcode
  *   Optional language code to translate to a language other than the default.
  * @param $calendar
@@ -78,19 +259,276 @@ function calendar_jalali_admin_form_validate($form, &$form_state) {
  *   The formatted date or FALSE otherwise.
  *
  * @see format_date()
+ *
+ * @ingroup calendar_format_callback
  */
-function calendar_jalali_formatter($timestamp, $type, $format, $langcode, $calendar) {
-  // TODO: Implement!
-  return FALSE;
+function calendar_jalali_formatter($timestamp, $format, $timezone = 0, $langcode = NULL, $calendar = NULL) {
+  $date = '';
+	list($year, $month, $day) = explode('~', calendar_framework_formatter_default($timestamp, 'Y~n~j'));
+	list($jyear, $jmonth, $jday) = calendar_jalali_convert($year, $month, $day);
+
+  $max = strlen($format);
+	for ($i = 0; $i < $max; $i++) {
+		switch ($format[$i]) {
+			case 'y':
+				$date .= substr($jyear, 2, 4);
+				break;
+
+			case 'Y':
+				$date .= $jyear;
+				break;
+
+			case 'M':
+			case 'F':
+			  // Check configs for month representation.
+			  $function = $calendar['config']['calendar_jalali_translate_months'] ? 'array_values' : 'array_keys';
+			  $jmonths = $function(calendar_jalali_year_months());
+				$date .= $jmonths[$jmonth - 1];
+				break;
+
+      case 'D':
+      case 'l':
+        $function = $calendar['config']['calendar_jalali_translate_weekdays'] ? 'array_values' : 'array_keys';
+        $weekdays = $function(calendar_jalali_week_days());
+        $date .= $weekdays[calendar_jalali_formatter($timestamp, 'w')];
+        break;
+
+      case 'a':
+      case 'A':
+        $default = date($format[$i], $timestamp);
+        $case = ($format[$i] == 'a') ? 'lowercase' : 'uppercase';
+        $meridiems = calendar_jalali_meridiems($case);
+        $date .= $calendar['config']['calendar_jalali_translate_meridiem'] ? $meridiems[$default] : $default;
+        break;
+
+			case 'm':
+				$date .= sprintf('%02d', $jmonth);
+				break;
+
+			case 'n':
+				$date .= $jmonth;
+				break;
+
+			case 'd':
+				$date .= sprintf('%02d', $jday);
+				break;
+
+			case 'j':
+				$date .= $jday;
+				break;
+
+			case 'w':
+				$date .= (calendar_framework_formatter_default($timestamp, 'w') + 1) % 7;
+				break;
+
+      case 'r':
+        $date .= calendar_jalali_formatter($timestamp, 'D, d M Y H:i:s O');
+        break;
+
+			case 'N':
+				$date .= calendar_jalali_formatter($timestamp, 'w') + 1;
+				break;
+
+			case 't':
+			  $jmonth_days = calendar_jalali_month_days();
+				if ($jmonth < 12) {
+				  $date .= $jmonth_days[$jmonth - 1];
+				}
+				elseif (_calendar_jalali_check($jyear, $jmonth, 30)) {
+				  $date .= '30';
+				}
+				else {
+				  $date .= '29';
+				}
+				break;
+
+			case 'z':
+				$day_of_year = 0;
+				$jmonth_days = calendar_jalali_month_days();
+				
+				for ($n = 0; $n < $jmonth - 1; $n++) {
+					$day_of_year += $jmonth_days[$n];
+				}
+				$day_of_year += $jday - 1;
+				$date .= $day_of_year;
+				break;
+
+			case 'L':
+				$date .= _calendar_jalali_check($jyear, 12, 30) ? '1' : '0';
+				break;
+
+			case 'W':
+				$z = calendar_jalali_formatter($timestamp, 'z');
+				// First saturday.
+				$saturday = ($z - calendar_jalali_formatter($timestamp, 'w') + 7) % 7;
+				$days = $z - $saturday;
+				
+				if ($days < 0) {
+					$z += _calendar_jalali_check($jyear - 1, 12, 30) ? 366 : 365;
+					$saturday = ($z - calendar_jalali_formatter($timestamp, 'w') + 7) % 7;
+					$days = $z - $saturday; 
+				}
+				$date .= floor($days / 7) + 1;
+				break;
+				
+			case '\\':
+				if ($i + 1 < strlen($format)) {
+				  $date .= $format[++$i];
+				}
+				else {
+				  $date .= $format[$i];
+				}
+				break;
+
+			default:
+				$date .= calendar_framework_formatter_default($timestamp, $format[$i], $timezone);
+		}
+	}
+  
+  // Check configs for number representation.
+  if ($calendar['config']['calendar_jalali_translate_numbers']) {
+    return _calendar_jalali_convert_number($date);
+  }
+  
+	return $date;
 }
 
 
 /**
- * Jalali calendar date converter callback.
+ * Helper function to check whether the combination
+ * of passed values are in Jalali calendar range or not.
  *
- * @todo IMPLEMENT!
+ * @param $year
+ *   Jalali year.
+ * @param $month
+ *   Jalali month.
+ * @param $day
+ *   Jalali day.
+ *
+ * @return
+ *   Boolean value.
  */
-function calendar_jalali_converter() {
-  return FALSE;
+function _calendar_jalali_check($year, $month, $day) {
+  $jmonth_days = calendar_jalali_month_days();
+  if ($year < 0 || $year > 32767 || $month < 1 || $month > 12 || $day < 1) {
+    return FALSE;
+  }
+  
+  if ($day > ($jmonth_days[$month - 1] + ($month == 12 && !(($year - 979) % 33 % 4)))) {
+    return FALSE;
+  }
+  
+  return TRUE;
+}
+
+
+/**
+ * Helper function to convert a 
+ * Latin number to its Persian representaion.
+ *
+ * @param $string
+ *   The haystack string to be googled!
+ *
+ * @return
+ *   Number-Persianized string!
+ */
+function _calendar_jalali_convert_number($string) {
+  $output = '';
+  $max = strlen(trim($string));
+  
+  for ($i = 0; $i < $max; ++$i) {
+    $output .= ctype_digit($string[$i]) ? pack('C*', 0xDB, 0xB0 + $string[$i]) : $string[$i];
+  }
+  
+  return $output;
+}
+
+
+/**
+ * Calendar month days helper.
+ *
+ * @return
+ *   An array of ordered numbers corresponding
+ *   to a Jalali year months length of days.
+ *
+ * @ingroup calendar_helper
+ */
+function calendar_jalali_month_days() {
+  return array(31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29);
+}
+
+
+########### TODO: PACKAGE THE BELOW HELPERS INTO ONE CALENDAR_JALALI_TRANSLATABLES(). ########################
+
+/**
+ * Calendar Ante meridiem and Post meridiem helper.
+ *
+ * @param $case
+ *   Whether to return the lowercase meridiems or uppercase ones.
+ * @return
+ *   An array of calendar Ante/Post meridiems based on $case.
+ *
+ * @ingroup calendar_helper
+ */
+function calendar_jalali_meridiems($case) {
+  $meridiems = array(
+    'lowercase' => array(
+      'am' => t('am'),
+      'pm' => t('pm'),
+    ),
+    'uppercase' => array(
+      'AM' => t('AM'),
+      'PM' => t('PM'),
+    ),
+  );
+  
+  return $meridiems[$case];
+}
+
+
+/**
+ * Calendar week days helper.
+ *
+ * @return
+ *   An array of ordered native calendar weekday names.
+ *
+ * @ingroup calendar_helper
+ */
+function calendar_jalali_week_days() {
+  return array(
+    'Shanbeh'       => t('Shanbeh'),
+    'Yekshanbeh'    => t('Yekshanbeh'),
+    'Doshanbeh'     => t('Doshanbeh'),
+    'Sehshanbeh'    => t('Sehshanbeh'),
+    'Chaharshanbeh' => t('Chaharshanbeh'),
+    'Panjshanbeh'   => t('Panjshanbeh'),
+    'Jomeh'         => t('Jomeh'),
+  );
+}
+
+
+/**
+ * Calendar year months helper.
+ *
+ * @return
+ *   An array of ordered calendar months of a year.
+ *
+ * @ingroup calendar_helper
+ */
+function calendar_jalali_year_months() {
+  return array(
+    'Farvardin'   => t('Farvardin'),
+    'Ordibehesht' => t('Ordibehesht'),
+    'Khordad'     => t('Khordad'),
+    'Tir'         => t('Tir'),
+    'Mordad'      => t('Mordad'),
+    'Shahrivar'   => t('Shahrivar'),
+    'Mehr'        => t('Mehr'),
+    'Aban'        => t('Aban'),
+    'Azar'        => t('Azar'),
+    'Dey'         => t('Dey'),
+    'Bahman'      => t('Bahman'),
+    'Esfand'      => t('Esfand'),
+  );
 }
 
