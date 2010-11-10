@@ -209,10 +209,10 @@ function calendar_framework_form_alter(&$form, $form_state, $form_id) {
     );
   }
       
-  // Override the default themer.
+  // Override the default themer callback.
   $form['#theme'] = 'calendar_framework_languages_overview_form';
   
-  // And append submission callbacks.
+  // And append a submission one.
   $form['#submit'][] = 'calendar_framework_languages_overview_form_submit';
 }
 
@@ -305,6 +305,61 @@ function calendar_framework_default() {
 
 
 /**
+ * Helper function to select the proper
+ * calendar based on current user and language.
+ *
+ * @return
+ *   Calendar identifier.
+ *
+ * @ingroup module_helper
+ */
+function _calendar_framework_select() {
+  global $user;
+  global $language;
+  
+  // Calendar per user.
+  if (isset($user->calendar) && $user->calendar != 'default' && user_access('select different calendar')) {
+    return calendar_framework_calendars('calendar', $user->calendar);
+  }
+  
+  // Calendar per language.
+  if ($calendar = variable_get('calendar_framework_' . $language->language . '_calendar', FALSE)) {
+    return ($calendar == 'default') ? calendar_framework_default() : calendar_framework_calendars('calendar', $calendar);
+  }
+  
+  return calendar_framework_default();
+}
+
+
+/**
+ * Helper function to build a list of defined calendars.
+ *
+ * @return
+ *   An array of available calendars.
+ *
+ * @ingroup module_helper
+ */
+function _calendar_framework_build() {
+  $names = array();
+  $calendars = array();
+
+  $calendars_defined = module_invoke_all('calendar_info');
+  foreach ($calendars_defined as $identifier => $info) {
+    // Skip lazy modules without a format callback.
+    if (!isset($info['format callback']) || !function_exists($info['format callback'])) {
+      continue;
+    }
+    
+    $info['config'] = variable_get('calendar_framework_settings_' . $identifier, '');    
+    $calendars[$identifier] = $info;
+    $names[$identifier] = $info['name'];     
+  }
+
+  return array($calendars, $names);
+}
+
+
+/**
  * API function for 3rdparty calendar framework modules.
  *
  * Modules formatter callbacks that does not define a particular
@@ -358,60 +413,6 @@ function calendar_framework_formatter_default($timestamp, $format, $timezone = 0
   }
 
   return $date;
-}
-
-
-/**
- * Helper function to select the proper
- * calendar based on current user and language.
- *
- * @return
- *   Calendar identifier.
- *
- * @ingroup module_helper
- */
-function _calendar_framework_select() {
-  global $user;
-  global $language;
-  
-  // Calendar per user.
-  if (isset($user->calendar) && $user->calendar != 'default' && user_access('select different calendar')) {
-    return calendar_framework_calendars('calendar', $user->calendar);
-  }
-  
-  // Calendar per language.
-  if ($calendar = variable_get('calendar_framework_' . $language->language . '_calendar', FALSE)) {
-    return ($calendar == 'default') ? calendar_framework_default() : calendar_framework_calendars('calendar', $calendar);
-  }
-  
-  return calendar_framework_default();
-}
-
-/**
- * Helper function to build a list of defined calendars.
- *
- * @return
- *   An array of available calendars.
- *
- * @ingroup module_helper
- */
-function _calendar_framework_build() {
-  $names = array();
-  $calendars = array();
-
-  $calendars_defined = module_invoke_all('calendar_info');
-  foreach ($calendars_defined as $identifier => $info) {
-    // Skip lazy modules without a format callback.
-    if (!isset($info['format callback']) || !function_exists($info['format callback'])) {
-      continue;
-    }
-    
-    $info['config'] = variable_get('calendar_framework_settings_' . $identifier, '');    
-    $calendars[$identifier] = $info;
-    $names[$identifier] = $info['name'];     
-  }
-
-  return array($calendars, $names);
 }
 
 
