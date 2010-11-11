@@ -292,11 +292,16 @@ function calendar_jalali_formatter($timestamp, $format, $timezone = 0, $langcode
         break;
 
       case 'a':
-      case 'A': // TODO: Can be improved.
+      case 'A':
         $default = calendar_framework_formatter($timestamp, $format[$i]);
-        $case = ($format[$i] == 'a') ? 'lower' : 'upper';
-        $meridiems = _calendar_jalali_t('meridiem_' . $case);
-        $date .= $calendar['config']['calendar_jalali_translate_meridiem'] ? $meridiems[$default] : $default;
+        if ($calendar['config']['calendar_jalali_translate_meridiem']) {
+          $case = ($format[$i] == 'a') ? 'lower' : 'upper';
+          $meridiems = _calendar_jalali_t('meridiem_' . $case);
+          $date .= $meridiems[$default];
+        }
+        else {
+          $date .= $default;
+        }
         break;
 
 			case 'm':
