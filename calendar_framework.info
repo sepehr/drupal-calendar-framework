@@ -1,5 +1,5 @@
 ; $Id$
 name = "Calendar Framework"
-description = "Multiple calendar support."
-core = 6.x
+description = "Provides a clean, extensive multiple calendar support."
 package = "Calendar Framework"
+core = 6.x

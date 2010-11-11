@@ -7,7 +7,7 @@
  */
 
 /**
- * Form callback to list all available calendars and their configs.
+ * Form callback to list all available calendars and their config links.
  *
  * @return
  *   An array of form elements to be themed later on.
@@ -41,7 +41,7 @@ function calendar_framework_calendars_form() {
     '#options' => $options,
   );
 
-  // Note language specific calendars.
+  // Note for language specific calendar configs.
   $form['calendar_framework_notice'] = array(
     '#type' => 'item',
     '#value' => t('<strong>Note</strong> that calendars are also <a href="!link">configurable per language</a> basis.',
@@ -196,6 +196,8 @@ function calendar_framework_calendar_form_submit($form, &$form_state) {
 
 /**
  * Theme callback for Locale language overview form.
+ * It's also compatible with admin_language.module which
+ * overrides the same themer callback.
  *
  * @param $form
  *   Language overview form array.
@@ -249,6 +251,12 @@ function theme_calendar_framework_languages_overview_form($form) {
     t('Weight'),
     array('data' => t('Operations')),
   );
+
+  // Remove admin_language.module options if not exist.
+  if (!isset($form['admin_language'][$name])) {
+    unset($header[6]);
+    $rows = array_map('array_filter', $rows);
+  }
 
   // Let it go!
   $output = theme('table', $header, $rows);

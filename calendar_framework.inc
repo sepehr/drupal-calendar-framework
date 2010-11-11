@@ -31,7 +31,6 @@ function _calendar_framework_patch_applied() {
   }
 
   // Applied?
-  // We won't get a negetive position ever.
   return (bool) strpos(file_get_contents($target), $patch_info['fingerprint']);
 }
 
@@ -58,13 +57,11 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
 
   // Copy the patch to Drupal files directory,
   // This way the file could be seen by CCK 
-  // filefield. Sorry for the suppression load mess!
+  // filefield. Sorry for the suppression load!
   $new_path = file_directory_path() . '/';
   if (!@copy($patch_info['path'] . $patch_info['name'], $new_path . $patch_info['name'])) {
     drupal_set_message($t('You have <a href="!patchmanager">Patch Manger</a> installed but we could not copy the Calendar Framework patch to files directory. Please check directory permissions and reinstall the module.',
-      array(
-        '!patchmanager' => url('admin/build/patch'),
-      )
+      array('!patchmanager' => url('admin/build/patch'))
     ), 'warning');
 
     return FALSE;
@@ -86,7 +83,7 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
   $file->status = FILE_STATUS_PERMANENT;
 
   // Save the patch file.
-  // Oh, we miss D7 file_save().
+  // Oh, missing D7 file_save().
   drupal_write_record('files', $file);
   $file->fid = db_result(db_query("SELECT fid FROM {files} WHERE filepath = '%s'", $file->filepath));
   
@@ -149,7 +146,7 @@ function _calendar_framework_patch_manager_delete() {
  *   - fingerprint: Returns patch fingerprint to check whether the patch is applied or not.
  *
  * @return
- *   Either partial or full Patch info.
+ *   Either partial or full patch file info.
  */
 function _calendar_framework_patch_info($type = 'all') {
   $t = get_t();

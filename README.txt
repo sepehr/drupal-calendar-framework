@@ -1,6 +1,6 @@
 Description
 ===========
-Drupal Calendar Framework to support multiple calendars.
+Provides a clean, extensive multiple calendar support.
 
 Important Notice
 ================
