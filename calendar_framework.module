@@ -382,7 +382,7 @@ function _calendar_framework_build() {
  */
 function calendar_framework_formatter($timestamp, $format, $timezone = 0) {
   $date = '';
-  $max = drupal_strlen($format);
+  $max = strlen($format);
 
   for ($i = 0; $i < $max; $i++) {
     $c = $format[$i];

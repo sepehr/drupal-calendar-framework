@@ -265,11 +265,11 @@ function calendar_jalali_formatter($timestamp, $format, $timezone = 0, $langcode
   list($year, $month, $day) = explode('~', calendar_framework_formatter($timestamp, 'Y~n~j'));
   list($jyear, $jmonth, $jday) = calendar_jalali_convert($year, $month, $day);
 
-  $max = drupal_strlen($format);
+  $max = strlen($format);
   for ($i = 0; $i < $max; $i++) {
     switch ($format[$i]) {
       case 'y':
-        $date .= drupal_substr($jyear, 2, 4);
+        $date .= substr($jyear, 2, 4);
         break;
 
       case 'Y':
@@ -375,7 +375,7 @@ function calendar_jalali_formatter($timestamp, $format, $timezone = 0, $langcode
         break;
 
       case '\\':
-        if ($i + 1 < drupal_strlen($format)) {
+        if ($i + 1 < strlen($format)) {
           $date .= $format[++$i];
         }
         else {
@@ -437,7 +437,7 @@ function _calendar_jalali_check($year, $month, $day) {
  */
 function _calendar_jalali_convert_number($string) {
   $output = '';
-  $max = drupal_strlen(trim($string));
+  $max = strlen(trim($string));
 
   for ($i = 0; $i < $max; ++$i) {
     $output .= ctype_digit($string[$i]) ? pack('C*', 0xDB, 0xB0 + $string[$i]) : $string[$i];
