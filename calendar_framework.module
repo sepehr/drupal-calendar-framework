@@ -380,7 +380,7 @@ function _calendar_framework_build() {
  *
  * @todo Pass it through the format_date() once it got improved.
  */
-function calendar_framework_formatter_default($timestamp, $format, $timezone = 0) {
+function calendar_framework_formatter($timestamp, $format, $timezone = 0) {
   $date = '';
   $max = strlen($format);
   
