@@ -20,7 +20,7 @@ function calendar_framework_enable() {
   $warning = t('Even though the <a href="!link">Calendar Framework</a> module is now enabled, it is useless till you properly apply the patch.',
     array('!link' => url('admin/settings/date-time/calendars'))
   );
-  
+
   $advice = t('It is strongly recommended to use <a href="!patchdoq">Patchdoq</a> or <a href="!patchmanager">Patch Manager</a> to handle core and contrib patches.',
     array(
       '!patchdoq' => module_exists('patchdoq') ? url('admin/build/patchdoq') : 'http://drupal.org/project/patchdoq',
@@ -54,7 +54,7 @@ function calendar_framework_install() {
     $t = get_t();
 
     // Introduce the patch to patch_manager.module.
-    if(_calendar_framework_patch_manager_insert()) {
+    if (_calendar_framework_patch_manager_insert()) {
       // Set the proper message.
       $message = $t('Calendar Framework patch has been successfully copied to files directory, Also <em>introduced</em> to <a href ="!patchmanager">Patch Manager</a>.',
         array('!patchmanager' => url('admin/build/patch'))

@@ -13,7 +13,7 @@
  */
 function calendar_jalali_calendar_info() {
   $calendar = array();
-  
+
   // An array of calendar information,
   // keyed by the calendar identifier.
   $calendar['jalali'] = array(
@@ -49,12 +49,12 @@ function calendar_jalali_calendar_info() {
 function calendar_jalali_admin_form($config) {
   $form = array();
   $locale = (function_exists('locale')) ? TRUE : FALSE;
-  
+
   $form['calendar_jalali_translate_numbers'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use the Persian representaion of numbers in date strings.'),
     '#description' => t('e.g. Use !number-fa instead of <strong>!number-en</strong>.',
-      array('!number-fa' => '۹', '!number-en' => '9',)
+      array('!number-fa' => '۹', '!number-en' => '9')
     ),
     '#default_value' => $config['calendar_jalali_translate_numbers'],
     '#return_value' => 1,
@@ -203,7 +203,7 @@ function calendar_jalali_convert_reverse($year, $month, $day) {
   $gyear = 1600 + 400 * (int) ($gday_no / 146097);
   $gday_no = $gday_no % 146097;
 
-  $leap = true;
+  $leap = TRUE;
   if ($gday_no >= 36525) {
     $gday_no--;
 
@@ -214,15 +214,15 @@ function calendar_jalali_convert_reverse($year, $month, $day) {
       $gday_no++;
     }
     else {
-      $leap = false;
+      $leap = FALSE;
     }
   }
 
-  $gyear += 4 * (int) ($gday_no / 1461); 
+  $gyear += 4 * (int) ($gday_no / 1461);
   $gday_no %= 1461;
 
   if ($gday_no >= 366) {
-    $leap = false;
+    $leap = FALSE;
     $gday_no--;
     $gyear += (int) ($gday_no / 365);
     $gday_no = $gday_no % 365;
@@ -242,7 +242,7 @@ function calendar_jalali_convert_reverse($year, $month, $day) {
  * {Calendar conversion is a just a pain!}
  *
  * @param $timestamp
- *   Unix timestamp to be formatted. 
+ *   Unix timestamp to be formatted.
  *   The proper $timezone value has been added by Drupal format_date().
  * @param $format
  *   PHP date() function format string.
@@ -262,27 +262,27 @@ function calendar_jalali_convert_reverse($year, $month, $day) {
  */
 function calendar_jalali_formatter($timestamp, $format, $timezone = 0, $langcode = NULL, $calendar = NULL) {
   $date = '';
-	list($year, $month, $day) = explode('~', calendar_framework_formatter($timestamp, 'Y~n~j'));
-	list($jyear, $jmonth, $jday) = calendar_jalali_convert($year, $month, $day);
+  list($year, $month, $day) = explode('~', calendar_framework_formatter($timestamp, 'Y~n~j'));
+  list($jyear, $jmonth, $jday) = calendar_jalali_convert($year, $month, $day);
 
-  $max = strlen($format);
-	for ($i = 0; $i < $max; $i++) {
-		switch ($format[$i]) {
-			case 'y':
-				$date .= substr($jyear, 2, 4);
-				break;
+  $max = drupal_strlen($format);
+  for ($i = 0; $i < $max; $i++) {
+    switch ($format[$i]) {
+      case 'y':
+        $date .= drupal_substr($jyear, 2, 4);
+        break;
 
-			case 'Y':
-				$date .= $jyear;
-				break;
+      case 'Y':
+        $date .= $jyear;
+        break;
 
-			case 'M':
-			case 'F':
-			  // Check configs for month representation.
-			  $function = $calendar['config']['calendar_jalali_translate_months'] ? 'array_values' : 'array_keys';
-			  $jmonths = $function(_calendar_jalali_t('months'));
-				$date .= $jmonths[$jmonth - 1];
-				break;
+      case 'M':
+      case 'F':
+        // Check configs for month representation.
+        $function = $calendar['config']['calendar_jalali_translate_months'] ? 'array_values' : 'array_keys';
+        $jmonths = $function(_calendar_jalali_t('months'));
+        $date .= $jmonths[$jmonth - 1];
+        break;
 
       case 'D':
       case 'l':
@@ -304,96 +304,96 @@ function calendar_jalali_formatter($timestamp, $format, $timezone = 0, $langcode
         }
         break;
 
-			case 'm':
-				$date .= sprintf('%02d', $jmonth);
-				break;
+      case 'm':
+        $date .= sprintf('%02d', $jmonth);
+        break;
 
-			case 'n':
-				$date .= $jmonth;
-				break;
+      case 'n':
+        $date .= $jmonth;
+        break;
 
-			case 'd':
-				$date .= sprintf('%02d', $jday);
-				break;
+      case 'd':
+        $date .= sprintf('%02d', $jday);
+        break;
 
-			case 'j':
-				$date .= $jday;
-				break;
+      case 'j':
+        $date .= $jday;
+        break;
 
-			case 'w':
-				$date .= (calendar_framework_formatter($timestamp, 'w') + 1) % 7;
-				break;
+      case 'w':
+        $date .= (calendar_framework_formatter($timestamp, 'w') + 1) % 7;
+        break;
 
       case 'r':
         $date .= calendar_jalali_formatter($timestamp, 'D, d M Y H:i:s O', $timezone, NULL, $calendar);
         break;
 
-			case 'N':
-				$date .= calendar_jalali_formatter($timestamp, 'w') + 1;
-				break;
+      case 'N':
+        $date .= calendar_jalali_formatter($timestamp, 'w') + 1;
+        break;
 
-			case 't':
-			  $jmonth_days = calendar_jalali_month_days();
-				if ($jmonth < 12) {
-				  $date .= $jmonth_days[$jmonth - 1];
-				}
-				elseif (_calendar_jalali_check($jyear, $jmonth, 30)) {
-				  $date .= '30';
-				}
-				else {
-				  $date .= '29';
-				}
-				break;
+      case 't':
+        $jmonth_days = calendar_jalali_month_days();
+        if ($jmonth < 12) {
+          $date .= $jmonth_days[$jmonth - 1];
+        }
+        elseif (_calendar_jalali_check($jyear, $jmonth, 30)) {
+          $date .= '30';
+        }
+        else {
+          $date .= '29';
+        }
+        break;
 
-			case 'z':
-				$day_of_year = 0;
-				$jmonth_days = calendar_jalali_month_days();
-				
-				for ($n = 0; $n < $jmonth - 1; $n++) {
-					$day_of_year += $jmonth_days[$n];
-				}
-				$day_of_year += $jday - 1;
-				$date .= $day_of_year;
-				break;
+      case 'z':
+        $day_of_year = 0;
+        $jmonth_days = calendar_jalali_month_days();
 
-			case 'L':
-				$date .= _calendar_jalali_check($jyear, 12, 30) ? '1' : '0';
-				break;
+        for ($n = 0; $n < $jmonth - 1; $n++) {
+          $day_of_year += $jmonth_days[$n];
+        }
+        $day_of_year += $jday - 1;
+        $date .= $day_of_year;
+        break;
 
-			case 'W':
-				$zone = calendar_jalali_formatter($timestamp, 'z');
-				// First saturday.
-				$saturday = ($zone - calendar_jalali_formatter($timestamp, 'w') + 7) % 7;
-				$days = $zone - $saturday;
-				
-				if ($days < 0) {
-					$zone += _calendar_jalali_check($jyear - 1, 12, 30) ? 366 : 365;
-					$saturday = ($zone - calendar_jalali_formatter($timestamp, 'w') + 7) % 7;
-					$days = $zone - $saturday; 
-				}
-				$date .= floor($days / 7) + 1;
-				break;
-				
-			case '\\':
-				if ($i + 1 < strlen($format)) {
-				  $date .= $format[++$i];
-				}
-				else {
-				  $date .= $format[$i];
-				}
-				break;
+      case 'L':
+        $date .= _calendar_jalali_check($jyear, 12, 30) ? '1' : '0';
+        break;
 
-			default:
-				$date .= calendar_framework_formatter($timestamp, $format[$i], $timezone);
-		}
-	}
-  
+      case 'W':
+        $zone = calendar_jalali_formatter($timestamp, 'z');
+        // First saturday.
+        $saturday = ($zone - calendar_jalali_formatter($timestamp, 'w') + 7) % 7;
+        $days = $zone - $saturday;
+
+        if ($days < 0) {
+          $zone += _calendar_jalali_check($jyear - 1, 12, 30) ? 366 : 365;
+          $saturday = ($zone - calendar_jalali_formatter($timestamp, 'w') + 7) % 7;
+          $days = $zone - $saturday;
+        }
+        $date .= floor($days / 7) + 1;
+        break;
+
+      case '\\':
+        if ($i + 1 < drupal_strlen($format)) {
+          $date .= $format[++$i];
+        }
+        else {
+          $date .= $format[$i];
+        }
+        break;
+
+      default:
+        $date .= calendar_framework_formatter($timestamp, $format[$i], $timezone);
+    }
+  }
+
   // Check configs for number representation.
   if ($calendar['config']['calendar_jalali_translate_numbers']) {
     return _calendar_jalali_convert_number($date);
   }
-  
-	return $date;
+
+  return $date;
 }
 
 
@@ -416,17 +416,17 @@ function _calendar_jalali_check($year, $month, $day) {
   if ($year < 0 || $year > 32767 || $month < 1 || $month > 12 || $day < 1) {
     return FALSE;
   }
-  
+
   if ($day > ($jmonth_days[$month - 1] + ($month == 12 && !(($year - 979) % 33 % 4)))) {
     return FALSE;
   }
-  
+
   return TRUE;
 }
 
 
 /**
- * Helper function to convert a 
+ * Helper function to convert a
  * Latin number to its Persian representaion.
  *
  * @param $string
@@ -437,12 +437,12 @@ function _calendar_jalali_check($year, $month, $day) {
  */
 function _calendar_jalali_convert_number($string) {
   $output = '';
-  $max = strlen(trim($string));
-  
+  $max = drupal_strlen(trim($string));
+
   for ($i = 0; $i < $max; ++$i) {
     $output .= ctype_digit($string[$i]) ? pack('C*', 0xDB, 0xB0 + $string[$i]) : $string[$i];
   }
-  
+
   return $output;
 }
 
@@ -484,7 +484,7 @@ function _calendar_jalali_t($type, $destination = 'translation') {
   if ($destination == 'translation' && !function_exists('locale')) {
     $destination = 'source';
   }
-  
+
   $source = array(
     'weekdays' => array(
       'Shanbeh', 'Yekshanbeh', 'Doshanbeh',
@@ -497,7 +497,7 @@ function _calendar_jalali_t($type, $destination = 'translation') {
     'meridiem_lower' => array('am', 'pm'),
     'meridiem_upper' => array('AM', 'PM'),
   );
-  
+
   return $destination == 'source' ?
     $source[$type] :
     array_combine($source[$type], array_map('locale', $source[$type], array_fill(0, count($source[$type]), 'fa')));

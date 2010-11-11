@@ -29,7 +29,7 @@ function calendar_framework_calendars_form() {
     );
 
     $form['sitewide'][$calendar['name']]['_config'] = array(
-      '#value' => function_exists($calendar['config callback']) ? 
+      '#value' => function_exists($calendar['config callback']) ?
         l(t('Configuration'), 'admin/settings/date-time/calendars/' . $identifier) :
         t('No configuration'),
     );
@@ -104,11 +104,11 @@ function theme_calendar_framework_calendars_form($form) {
 
   // Sets form table header.
   $header = array(
-    t('Default'), 
-    t('Calendar'), 
+    t('Default'),
+    t('Calendar'),
     array(
       'colspan' => 1,
-      'data' => t('Actions'), 
+      'data' => t('Actions'),
     )
   );
 
@@ -191,7 +191,7 @@ function calendar_framework_calendar_form_submit($form, &$form_state) {
     $form_state['values']['form_build_id']
   );
   variable_set('calendar_framework_settings_' . $calendar['identifier'], $form_state['values']);
-  
+
   $form_state['redirect'] = 'admin/settings/date-time/calendars';
   drupal_set_message(t('Configuration for <em>@calendar</em> has been successfully saved.',
     array('@calendar' => calendar_framework_calendar_title($calendar['identifier']))
@@ -212,14 +212,14 @@ function calendar_framework_calendar_form_submit($form, &$form_state) {
 function theme_calendar_framework_languages_overview_form($form) {
   $rows = array();
   $default = language_default();
-  
+
   // Set form table rows.
   foreach ($form['name'] as $name => $element) {
     // Skip form attributes.
     if (!is_array($element) || !element_child($name)) {
       continue;
     }
-    
+
     // Make the default language checkbox disabled.
     if ($name == $default->language) {
       $form['enabled'][$name]['#attributes']['disabled'] = 'disabled';
@@ -242,7 +242,7 @@ function theme_calendar_framework_languages_overview_form($form) {
       l(t('edit'), 'admin/settings/language/edit/'. $name) . (($name != 'en' && $name != $default->language) ? ' ' . l(t('delete'), 'admin/settings/language/delete/' . $name) : ''),
     );
   }
-  
+
   // Set form table header.
   $header = array(
     t('Enabled'),

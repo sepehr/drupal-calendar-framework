@@ -39,7 +39,7 @@ function calendar_framework_init() {
     drupal_set_message(t('Even though the <a href="!link">Calendar Framework</a> module is enabled, it is useless till you properly apply the patch.',
       array('!link' => url('admin/settings/date-time/calendars'))
     ), 'warning');
-    
+
     drupal_set_message(t('And you are going to get this message till you apply the patch or disable the module.'), 'warning');
   }
 }
@@ -106,7 +106,7 @@ function calendar_framework_patch() {
   // Include helpers.
   module_load_include('inc', 'calendar_framework');
   $patch_info = _calendar_framework_patch_info();
-  
+
   return array(
     'common.inc' => array(
       'name' => $patch_info['title'],
@@ -121,13 +121,13 @@ function calendar_framework_patch() {
 /**
  * Implements hook_format_date().
  *
- * This is a temporary hook implementation which employs a procedural concept of 
- * Factory design pattern until we all get a better format_date() function at Drupal core. 
- * Till those days we need to patch the includes/common.inc file to provide 
+ * This is a temporary hook implementation which employs a procedural concept of
+ * Factory design pattern until we all get a better format_date() function at Drupal core.
+ * Till those days we need to patch the includes/common.inc file to provide
  * the ability to implement hook_format_date().
  *
  * @param $timestamp
- *   Unix timestamp to be formatted. 
+ *   Unix timestamp to be formatted.
  *   Don't worry, the proper timezone value has been added to this by format_date().
  * @param $format
  *   PHP date() function format string.
@@ -144,7 +144,7 @@ function calendar_framework_patch() {
  * @see patch/common.inc-format_date.d6.patch
  */
 function calendar_framework_format_date($timestamp, $format, $timezone, $langcode) {
-  // Get the best-fit calendar for current 
+  // Get the best-fit calendar for current
   // user/language and call its formatter callback.
   $calendar = _calendar_framework_select();
   return $calendar['format callback']($timestamp, $format, $timezone, $langcode, $calendar);
@@ -162,10 +162,10 @@ function calendar_framework_user($op, &$edit, &$account, $category = NULL) {
   if ($op != 'form' || $category != 'account' || !user_access('select different calendar')) {
     return;
   }
-  
+
   $form = array();
   $calendars = calendar_framework_calendars('names');
-  
+
   $form['timezone']['calendar'] = array(
     '#type' => 'select',
     '#title' => t('Default calendar'),
@@ -174,7 +174,7 @@ function calendar_framework_user($op, &$edit, &$account, $category = NULL) {
     '#options' => $calendars += array('default' => t('Site default calendar')),
     '#default_value' => $account->calendar ? $account->calendar : 'default',
   );
-  
+
   return $form;
 }
 
@@ -190,16 +190,16 @@ function calendar_framework_form_alter(&$form, $form_state, $form_id) {
   if ($form_id != 'locale_languages_overview_form') {
     return;
   }
-  
+
   // Get a list system calendar names.
   $calendars = calendar_framework_calendars('names');
-  
+
   // For each language add a dropdown list,
   // to let the user choose desired calendar.
   $form['calendar_framework_languages'] = array(
     '#tree' => TRUE,
   );
-  
+
   foreach (array_keys($form['enabled']['#options']) as $lang) {
     $form['calendar_framework_languages'][$lang] = array(
       '#type' => 'select',
@@ -208,10 +208,10 @@ function calendar_framework_form_alter(&$form, $form_state, $form_id) {
       '#default_value' => variable_get('calendar_framework_' . $lang . '_calendar', 'default'),
     );
   }
-      
+
   // Override the default themer callback.
   $form['#theme'] = 'calendar_framework_languages_overview_form';
-  
+
   // And append a submission one.
   $form['#submit'][] = 'calendar_framework_languages_overview_form_submit';
 }
@@ -276,7 +276,7 @@ function calendar_framework_calendars($op = 'calendars', $identifier = NULL) {
       return $calendars;
 
     case 'calendar':
-        return is_array($calendars[$identifier]) ? 
+        return is_array($calendars[$identifier]) ?
           array_merge($calendars[$identifier], array('identifier' => $identifier)) : NULL;
 
     case 'names':
@@ -284,7 +284,7 @@ function calendar_framework_calendars($op = 'calendars', $identifier = NULL) {
 
     case 'name':
       return $names[$identifier];
-    
+
     case 'identifiers':
       return array_keys($calendars);
   }
@@ -316,17 +316,17 @@ function calendar_framework_default() {
 function _calendar_framework_select() {
   global $user;
   global $language;
-  
+
   // Calendar per user.
   if (isset($user->calendar) && $user->calendar != 'default' && user_access('select different calendar')) {
     return calendar_framework_calendars('calendar', $user->calendar);
   }
-  
+
   // Calendar per language.
   if ($calendar = variable_get('calendar_framework_' . $language->language . '_calendar', FALSE)) {
     return ($calendar == 'default') ? calendar_framework_default() : calendar_framework_calendars('calendar', $calendar);
   }
-  
+
   return calendar_framework_default();
 }
 
@@ -349,10 +349,10 @@ function _calendar_framework_build() {
     if (!isset($info['format callback']) || !function_exists($info['format callback'])) {
       continue;
     }
-    
-    $info['config'] = variable_get('calendar_framework_settings_' . $identifier, '');    
+
+    $info['config'] = variable_get('calendar_framework_settings_' . $identifier, '');
     $calendars[$identifier] = $info;
-    $names[$identifier] = $info['name'];     
+    $names[$identifier] = $info['name'];
   }
 
   return array($calendars, $names);
@@ -382,8 +382,8 @@ function _calendar_framework_build() {
  */
 function calendar_framework_formatter($timestamp, $format, $timezone = 0) {
   $date = '';
-  $max = strlen($format);
-  
+  $max = drupal_strlen($format);
+
   for ($i = 0; $i < $max; $i++) {
     $c = $format[$i];
     if (strpos('AaDlM', $c) !== FALSE) {
@@ -429,12 +429,12 @@ function calendar_framework_formatter($timestamp, $format, $timezone = 0) {
  */
 function calendar_framework_calendar_info() {
   $calendar = array();
-  
+
   $calendar['gregorian'] = array(
     'name' => t('Gregorian'),
     'format callback' => 'calendar_gregorian_formatter',
   );
-  
+
   return $calendar;
 }
 
@@ -443,7 +443,7 @@ function calendar_framework_calendar_info() {
  * Gregorian calendar (fake) date formatter callback.
  *
  * @param $timestamp
- *   Unix timestamp to be formatted. 
+ *   Unix timestamp to be formatted.
  *   The proper timezone value has been added by the native format_date().
  * @param $type
  *   The format to use. Can be "small", "medium" or "large" for the preconfigured

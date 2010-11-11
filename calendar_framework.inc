@@ -56,7 +56,7 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
   $patch_info = _calendar_framework_patch_info();
 
   // Copy the patch to Drupal files directory,
-  // This way the file could be seen by CCK 
+  // This way the file could be seen by CCK
   // filefield. Sorry for the suppression load!
   $new_path = file_directory_path() . '/';
   if (!@copy($patch_info['path'] . $patch_info['name'], $new_path . $patch_info['name'])) {
@@ -86,7 +86,7 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
   // Oh, missing D7 file_save().
   drupal_write_record('files', $file);
   $file->fid = db_result(db_query("SELECT fid FROM {files} WHERE filepath = '%s'", $file->filepath));
-  
+
   // Create the patch node.
   $patch = new stdClass();
   $patch->type = 'patch';
@@ -99,16 +99,16 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
   // Attach the patch file to the node.
   $patch->field_patch[0] = array(
     'list' => 1,
-		'fid' => $file->fid,
-		'title' => $file->filename,
-		'filename' => $file->filename,
-		'filepath' => $file->filepath,
-		'filesize' => $file->filesize,
-		'mimetype' => $file->filemime,
-	);
+    'fid' => $file->fid,
+    'title' => $file->filename,
+    'filename' => $file->filename,
+    'filepath' => $file->filepath,
+    'filesize' => $file->filesize,
+    'mimetype' => $file->filemime,
+  );
 
   // Save the patch node.
-  content_presave($patch); 
+  content_presave($patch);
   node_save($patch);
   content_insert($patch);
 
@@ -130,7 +130,7 @@ function _calendar_framework_patch_manager_delete() {
             LEFT JOIN {content_type_patch} ctp ON f.fid = ctp.field_patch_fid
             WHERE f.filepath = '%s'";
   $nid = db_result(db_query($query, $path));
-  node_delete($nid);   
+  node_delete($nid);
 }
 
 
