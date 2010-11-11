@@ -48,7 +48,7 @@ function calendar_jalali_calendar_info() {
  */
 function calendar_jalali_admin_form($config) {
   $form = array();
-  $locale = (!function_exists('locale')) ? TRUE : FALSE;
+  $locale = (function_exists('locale')) ? TRUE : FALSE;
   
   $form['calendar_jalali_translate_numbers'] = array(
     '#type' => 'checkbox',
@@ -63,7 +63,7 @@ function calendar_jalali_admin_form($config) {
   $form['translate_options'] = array(
     '#type' => 'fieldset',
     '#title' => t('Calendar Translation Settings'),
-    '#description' => t('You need to enable the <em>Locale</em> module to make use of these options.'),
+    '#description' => t('You need to have the <em>Locale</em> module enabled to make use of these options.'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
   );
@@ -74,9 +74,9 @@ function calendar_jalali_admin_form($config) {
     '#description' => t('If checked, you also need to translate Ante/Post meridiem to Persian using the <a href="!link">translate interface</a>.',
       array('!link' => url('admin/build/translate'))
     ),
-    '#default_value' => $config['calendar_jalali_translate_meridiem'],
+    '#default_value' => !$locale ? 0 : $config['calendar_jalali_translate_meridiem'],
     '#return_value' => 1,
-    '#disabled' => $locale,
+    '#disabled' => !$locale,
   );
 
   $form['translate_options']['calendar_jalali_translate_weekdays'] = array(
@@ -85,9 +85,9 @@ function calendar_jalali_admin_form($config) {
     '#description' => t('If checked, you also need to translate weekday names to Persian using the <a href="!link">translate interface</a>.',
       array('!link' => url('admin/build/translate'))
     ),
-    '#default_value' => $config['calendar_jalali_translate_weekdays'],
+    '#default_value' => !$locale ? 0 : $config['calendar_jalali_translate_weekdays'],
     '#return_value' => 1,
-    '#disabled' => $locale,
+    '#disabled' => !$locale,
   );
 
   $form['translate_options']['calendar_jalali_translate_months'] = array(
@@ -96,9 +96,9 @@ function calendar_jalali_admin_form($config) {
     '#description' => t('If checked, you also need to translate month names to Persian using the <a href="!link">translate interface</a>.',
       array('!link' => url('admin/build/translate'))
     ),
-    '#default_value' => $config['calendar_jalali_translate_months'],
+    '#default_value' => !$locale ? 0 : $config['calendar_jalali_translate_months'],
     '#return_value' => 1,
-    '#disabled' => $locale,
+    '#disabled' => !$locale,
   );
 
   return $form;
