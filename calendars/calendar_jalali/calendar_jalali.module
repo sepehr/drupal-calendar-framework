@@ -48,6 +48,23 @@ function calendar_jalali_calendar_info() {
  */
 function calendar_jalali_admin_form($config) {
   $form = array();
+  
+  $form['calendar_jalali_translate_numbers'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Replace numbers with their Persian representaion.'),
+    '#default_value' => $config['calendar_jalali_translate_numbers'],
+    '#return_value' => 1,
+  );
+
+  $form['calendar_jalali_translate_meridiem'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Translate calendar Ante meridiem and Post meridiem values.'),
+    '#description' => t('If checked, you also need to translate Ante/Post meridiem to Persian using the <a href="!link">translate interface</a>.',
+      array('!link' => url('admin/build/translate'))
+    ),
+    '#default_value' => $config['calendar_jalali_translate_meridiem'],
+    '#return_value' => 1,
+  );
 
   $form['calendar_jalali_translate_months'] = array(
     '#type' => 'checkbox',
@@ -58,7 +75,7 @@ function calendar_jalali_admin_form($config) {
     '#default_value' => $config['calendar_jalali_translate_months'],
     '#return_value' => 1,
   );
-  
+
   $form['calendar_jalali_translate_weekdays'] = array(
     '#type' => 'checkbox',
     '#title' => t('Translate calendar weekday names and show the Persian representation.'),
@@ -69,37 +86,7 @@ function calendar_jalali_admin_form($config) {
     '#return_value' => 1,
   );
 
-  $form['calendar_jalali_translate_numbers'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Replace numbers with their Persian representaion.'),
-    '#default_value' => $config['calendar_jalali_translate_numbers'],
-    '#return_value' => 1,
-  );
-  
-  $form['calendar_jalali_translate_meridiem'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Translate calendar Ante meridiem and Post meridiem values.'),
-    '#description' => t('If checked, you also need to translate Ante/Post meridiem to Persian using the <a href="!link">translate interface</a>.',
-      array('!link' => url('admin/build/translate'))
-    ),
-    '#default_value' => $config['calendar_jalali_translate_meridiem'],
-    '#return_value' => 1,
-  );
-  
   return $form;
-}
-
-
-/**
- * Validation callback for Jalali calendar administration form.
- *
- * @ingroup form_validate
- */
-function calendar_jalali_admin_form_validate($form, &$form_state) {
-  // Test.
-  if ($form_state['values']['calendar_jalali_test']) {
-    drupal_set_message(t('love that checkbox? :)'));
-  }
 }
 
 
@@ -198,16 +185,13 @@ function calendar_jalali_convert_reverse($year, $month, $day) {
   $jday_no += $day;
   $gday_no = $jday_no + 79;
 
-  // 146097 = 365*400 + 400/4 - 400/100 + 400/400
   $gyear = 1600 + 400 * (int) ($gday_no / 146097);
   $gday_no = $gday_no % 146097;
 
   $leap = true;
-  // 36525 = 365*100 + 100/4
   if ($gday_no >= 36525) {
     $gday_no--;
 
-    // 36524 = 365*100 + 100/4 - 100/100
     $gyear += 100 * (int) ($gday_no / 36524);
     $gday_no = $gday_no % 36524;
 
@@ -219,7 +203,6 @@ function calendar_jalali_convert_reverse($year, $month, $day) {
     }
   }
 
-  // 1461 = 365*4 + 4/4
   $gyear += 4 * (int) ($gday_no / 1461); 
   $gday_no %= 1461;
 
@@ -282,14 +265,14 @@ function calendar_jalali_formatter($timestamp, $format, $timezone = 0, $langcode
 			case 'F':
 			  // Check configs for month representation.
 			  $function = $calendar['config']['calendar_jalali_translate_months'] ? 'array_values' : 'array_keys';
-			  $jmonths = $function(calendar_jalali_year_months());
+			  $jmonths = $function(_calendar_jalali_t('months'));
 				$date .= $jmonths[$jmonth - 1];
 				break;
 
       case 'D':
       case 'l':
         $function = $calendar['config']['calendar_jalali_translate_weekdays'] ? 'array_values' : 'array_keys';
-        $weekdays = $function(calendar_jalali_week_days());
+        $weekdays = $function(_calendar_jalali_t('weekdays'));
         $date .= $weekdays[calendar_jalali_formatter($timestamp, 'w')];
         break;
 
@@ -297,7 +280,7 @@ function calendar_jalali_formatter($timestamp, $format, $timezone = 0, $langcode
       case 'A':
         $default = date($format[$i], $timestamp);
         $case = ($format[$i] == 'a') ? 'lowercase' : 'uppercase';
-        $meridiems = calendar_jalali_meridiems($case);
+        $meridiems = _calendar_jalali_t('meridiems', $case);
         $date .= $calendar['config']['calendar_jalali_translate_meridiem'] ? $meridiems[$default] : $default;
         break;
 
@@ -458,77 +441,65 @@ function calendar_jalali_month_days() {
 }
 
 
-########### TODO: PACKAGE THE BELOW HELPERS INTO ONE CALENDAR_JALALI_TRANSLATABLES(). ########################
-
 /**
- * Calendar Ante meridiem and Post meridiem helper.
+ * Calendar translate helper.
  *
+ * @param $type
+ *   Type of needed translation.
  * @param $case
  *   Whether to return the lowercase meridiems or uppercase ones.
+ *
  * @return
- *   An array of calendar Ante/Post meridiems based on $case.
+ *   An associative array of translations keyed by their sources.
  *
  * @ingroup calendar_helper
  */
-function calendar_jalali_meridiems($case) {
-  $meridiems = array(
-    'lowercase' => array(
-      'am' => t('am'),
-      'pm' => t('pm'),
+function _calendar_jalali_t($type = 'all', $case = NULL) {
+  $t = array(
+    'weekdays' => array(
+      'Shanbeh'       => t('Shanbeh'),
+      'Yekshanbeh'    => t('Yekshanbeh'),
+      'Doshanbeh'     => t('Doshanbeh'),
+      'Sehshanbeh'    => t('Sehshanbeh'),
+      'Chaharshanbeh' => t('Chaharshanbeh'),
+      'Panjshanbeh'   => t('Panjshanbeh'),
+      'Jomeh'         => t('Jomeh'),
     ),
-    'uppercase' => array(
-      'AM' => t('AM'),
-      'PM' => t('PM'),
+    'months' => array(
+      'Farvardin'   => t('Farvardin'),
+      'Ordibehesht' => t('Ordibehesht'),
+      'Khordad'     => t('Khordad'),
+      'Tir'         => t('Tir'),
+      'Mordad'      => t('Mordad'),
+      'Shahrivar'   => t('Shahrivar'),
+      'Mehr'        => t('Mehr'),
+      'Aban'        => t('Aban'),
+      'Azar'        => t('Azar'),
+      'Dey'         => t('Dey'),
+      'Bahman'      => t('Bahman'),
+      'Esfand'      => t('Esfand'),
+    ),
+    'meridiems' => array(
+      'lowercase' => array(
+        'am' => t('am'),
+        'pm' => t('pm'),
+      ),
+      'uppercase' => array(
+        'AM' => t('AM'),
+        'PM' => t('PM'),
+      ),
     ),
   );
   
-  return $meridiems[$case];
-}
-
-
-/**
- * Calendar week days helper.
- *
- * @return
- *   An array of ordered native calendar weekday names.
- *
- * @ingroup calendar_helper
- */
-function calendar_jalali_week_days() {
-  return array(
-    'Shanbeh'       => t('Shanbeh'),
-    'Yekshanbeh'    => t('Yekshanbeh'),
-    'Doshanbeh'     => t('Doshanbeh'),
-    'Sehshanbeh'    => t('Sehshanbeh'),
-    'Chaharshanbeh' => t('Chaharshanbeh'),
-    'Panjshanbeh'   => t('Panjshanbeh'),
-    'Jomeh'         => t('Jomeh'),
-  );
-}
-
-
-/**
- * Calendar year months helper.
- *
- * @return
- *   An array of ordered calendar months of a year.
- *
- * @ingroup calendar_helper
- */
-function calendar_jalali_year_months() {
-  return array(
-    'Farvardin'   => t('Farvardin'),
-    'Ordibehesht' => t('Ordibehesht'),
-    'Khordad'     => t('Khordad'),
-    'Tir'         => t('Tir'),
-    'Mordad'      => t('Mordad'),
-    'Shahrivar'   => t('Shahrivar'),
-    'Mehr'        => t('Mehr'),
-    'Aban'        => t('Aban'),
-    'Azar'        => t('Azar'),
-    'Dey'         => t('Dey'),
-    'Bahman'      => t('Bahman'),
-    'Esfand'      => t('Esfand'),
-  );
+  switch ($type) {
+    case 'all':
+      return $t;
+    
+    case 'meridiems':
+      return $t[$type][$case];
+    
+    default:
+      return $t[$type];
+  }
 }
 
