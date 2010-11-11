@@ -360,7 +360,7 @@ function _calendar_framework_build() {
 
 
 /**
- * API function for 3rdparty calendar framework modules.
+ * API function acting as a fallback for 3rdparty calendar framework modules.
  *
  * Modules formatter callbacks that does not define a particular
  * format should pass the format to this API function, so the timestamp
@@ -440,7 +440,7 @@ function calendar_framework_calendar_info() {
 
 
 /**
- * Gregorian calendar date formatter callback.
+ * Gregorian calendar (fake) date formatter callback.
  *
  * @param $timestamp
  *   Unix timestamp to be formatted. 
@@ -468,7 +468,8 @@ function calendar_gregorian_formatter($timestamp, $type, $format, $langcode, $ca
 
 
 /**
- * Calendar month days helper.
+ * Calendar month days helper. Also acts as a fallback
+ * for a missing calendar_module_month_days() callback.
  *
  * @return
  *   An array of ordered numbers corresponding
