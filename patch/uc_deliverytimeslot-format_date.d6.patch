@@ -1,0 +1,45 @@
+diff --git uc_deliverytimeslot.module uc_deliverytimeslot.module
+index 22b5faa..594a63f 100644
+--- uc_deliverytimeslot.module
++++ uc_deliverytimeslot.module
+@@ -354,7 +354,7 @@ function theme_deliverytimeslot_pane($form) {
+             $checked = '';
+           }
+ 
+-          $header[] = array('data' => t("!day", array("!day" => date('l', $timestamps))) .'<div class="deliveryday">'. date('j', $timestamps) .'&nbsp;'. t('!month', array('!month' => date('F', $timestamps))) .'</div>', 'class' => 'deliverydate');
++          $header[] = array('data' => t("!day", array("!day" => format_date($timestamps, 'custom', 'l'))) .'<div class="deliveryday">'. format_date($timestamps, 'custom', 'j') .'&nbsp;'. t('!month', array('!month' => format_date($timestamps, 'custom', 'F'))) .'</div>', 'class' => 'deliverydate');
+ 
+           $class = 'free';
+           $max = $data = '';
+@@ -397,8 +397,8 @@ function theme_deliverytimeslot_pane($form) {
+       $row = array();
+       if (in_array(date('l', $timestamps), variable_get('uc_deliverytimeslot_week_days', _uc_deliverytimeslot_week_days()))) {
+ 
+-        $row[] = array('data' => t('!day', array('!day' => date('l', $timestamps))), 'class' => 'deliveryday');
+-        $row[] = array('data' => date('j', $timestamps) .' '. t('!month', array('!month' => date('F', $timestamps))), 'class' => 'deliverydate');
++        $row[] = array('data' => t('!day', array('!day' => format_date($timestamps, 'custom', 'l'))), 'class' => 'deliveryday');
++        $row[] = array('data' => format_date($timestamps, 'custom', 'j') .' '. t('!month', array('!month' => date('F', $timestamps))), 'class' => 'deliverydate');
+ 
+         foreach ($timeslot as $sid => $slot) {
+           // back button
+@@ -531,13 +531,13 @@ function _uc_deliverytimeslot_timeslot($array = TRUE) {
+   $deliverytimeslot_timeslot = variable_get('uc_deliverytimeslot_timeslot', '');
+   if ($deliverytimeslot_timeslot == '') {
+     $deliverytimeslot_timeslot = array(
+-      '8:00-10:00',
+-      '10:00-12:00',
+-      '12:00-14:00',
+-      '14:00-16:00',
+-      '16:00-18:00',
+-      '18:00-20:00',
+-      '20:00-22:00',
++      t('8:00-10:00'),
++      t('10:00-12:00'),
++      t('12:00-14:00'),
++      t('14:00-16:00'),
++      t('16:00-18:00'),
++      t('18:00-20:00'),
++      t('20:00-22:00'),
+     );
+   }
+   else {

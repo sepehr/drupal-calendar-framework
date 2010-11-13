@@ -108,7 +108,7 @@ function calendar_framework_requirements($phase) {
 
   $t = get_t();
   $requirements = array();
-  $patch_info = _calendar_framework_patch_info();
+  $patch_info = _calendar_framework_patch_info(TRUE);
   $requirements_error = $t('Calendar Framework <a href="!patch">patch</a> is not applied to <em>!patch_target</em> file, but it is <u>required</u> for the module to work. Please refer to <a href="!docs">Applying Patches Documentation</a> to be able to apply this patch correctly. Also, It is strongly recommended to use <a href="!patchdoq">Patchdoq</a> or <a href="!patchmanager">Patch Manager</a> to handle core and contrib patches.',
     array(
       '!patch' => $base_url . '/' . $patch_info['path'] . $patch_info['name'],

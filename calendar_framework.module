@@ -146,7 +146,11 @@ function calendar_framework_format_date($timestamp, $format, $timezone, $langcod
   // Get the best-fit calendar for current
   // user/language and call its formatter callback.
   $calendar = _calendar_framework_select();
-  return $calendar['format callback']($timestamp, $format, $timezone, $langcode, $calendar);
+  if (isset($calendar['format callback']) && function_exists($calendar['format callback'])) {
+    return $calendar['format callback']($timestamp, $format, $timezone, $langcode, $calendar);
+  }
+
+  return FALSE;
 }
 
 

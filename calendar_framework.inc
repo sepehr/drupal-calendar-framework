@@ -16,27 +16,33 @@
  * @todo Check whether the runkit extension is loaded to do a dirty magic.
  */
 function _calendar_framework_patch_applied() {
-  $patch_info = _calendar_framework_patch_info();
+  $patches = _calendar_framework_patch_info(TRUE);
 
-  // Patch target relative path to Drupal base.
-  $relative_path = $patch_info['target'];
+  foreach ($patches as $identifier => $patch) {
+    // Patch target relative path to Drupal base.
+    $relative_path = $patch['target'];
 
-  // Patch target absolute path.
-  if (module_exists('absolute_path')) {
-    global $absolute_path;
-    $target = $absolute_path . '/' . $relative_path;
+    // Patch target absolute path.
+    if (module_exists('absolute_path')) {
+      global $absolute_path;
+      $target = $absolute_path . '/' . $relative_path;
+    }
+    else {
+      $target = realpath(drupal_get_path('module', 'system') . '/../../' . $relative_path);
+    }
+
+    // Applied?
+    if (strpos(file_get_contents($target), $patch['fingerprint']) === FALSE) {
+      return FALSE;
+    }
   }
-  else {
-    $target = realpath(drupal_get_path('module', 'system') . '/../../' . $relative_path);
-  }
 
-  // Applied?
-  return (bool) strpos(file_get_contents($target), $patch_info['fingerprint']);
+  return TRUE;
 }
 
 
 /**
- * Helper function to create a patch record
+ * Helper function to create patch records
  * for patch_manager.module once the module gets installed.
  *
  * @param $patch_filename
@@ -52,68 +58,70 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
   }
 
   global $user;
-  $t = get_t();
-  $patch_info = _calendar_framework_patch_info();
+  $patches = _calendar_framework_patch_info();
 
-  // Copy the patch to Drupal files directory,
-  // This way the file could be seen by CCK
-  // filefield. Sorry for the suppression load!
-  $new_path = file_directory_path() . '/';
-  if (!@copy($patch_info['path'] . $patch_info['name'], $new_path . $patch_info['name'])) {
-    drupal_set_message($t('You have <a href="!patchmanager">Patch Manger</a> installed but we could not copy the Calendar Framework patch to files directory. Please check directory permissions and reinstall the module.',
-      array('!patchmanager' => url('admin/build/patch'))
-    ), 'warning');
+  foreach ($patches as $identifier => $patch) {
+    // Copy the patch to Drupal files directory,
+    // This way the file could be seen by CCK
+    // filefield. Sorry for the suppression load!
+    $new_path = file_directory_path() . '/';
+    if (!@copy($patch['path'] . $patch['name'], $new_path . $patch['name'])) {
+      $t = get_t();
+      drupal_set_message($t('You have <a href="!patchmanager">Patch Manger</a> installed but we could not copy the Calendar Framework patch to files directory. Please check directory permissions and reinstall the module.',
+        array('!patchmanager' => url('admin/build/patch'))
+      ), 'warning');
 
-    return FALSE;
+      return FALSE;
+    }
+
+    // Oh, I wish I could automate eth!
+    // chmod($patch_info['target'], 0646);
+
+    // Create the patch file.
+    $file = new stdClass();
+    $file->list = 1;
+    $file->uid = $user->uid;
+    $file->timestamp = time();
+    $file->filename = $patch['name'];
+    $file->filesource = $patch['name'];
+    $file->filemime = file_get_mimetype($patch['name']);
+    $file->filepath = $new_path . $patch['name'];
+    $file->filesize = filesize($new_path . $patch['name']);
+    $file->status = FILE_STATUS_PERMANENT;
+
+    // Save the patch file.
+    // Oh, missing D7 file_save().
+    drupal_write_record('files', $file);
+    $file->fid = db_result(db_query("SELECT fid FROM {files} WHERE filepath = '%s'", $file->filepath));
+
+    // Create the patch node.
+    $patch_node = new stdClass();
+    $patch_node->type = 'patch';
+    $patch_node->language = 'en';
+    $patch_node->uid = $user->uid;
+    $patch_node->title = $patch['title'];
+    $patch_node->body = $patch['description'];
+    $patch_node->field_module[0]['value'] = $patch['target module'];
+    if (!is_null($patch['issue']) && is_numeric($patch['issue'])) {
+      $patch_node->field_drupal_issue[0]['value'] = $patch['issue'];
+    }
+
+    // Attach the patch file to the node.
+    $patch_node->field_patch[0] = array(
+      'list' => 1,
+      'fid' => $file->fid,
+      'title' => $file->filename,
+      'filename' => $file->filename,
+      'filepath' => $file->filepath,
+      'filesize' => $file->filesize,
+      'mimetype' => $file->filemime,
+    );
+
+    // Save the patch node.
+    content_presave($patch_node);
+    node_save($patch_node);
+    content_insert($patch_node);
   }
-
-  // Oh, I wish I could automate eth!
-  // chmod($patch_info['target'], 0646);
-
-  // Create the patch file.
-  $file = new stdClass();
-  $file->list = 1;
-  $file->uid = $user->uid;
-  $file->timestamp = time();
-  $file->filename = $patch_info['name'];
-  $file->filesource = $patch_info['name'];
-  $file->filemime = file_get_mimetype($patch_info['name']);
-  $file->filepath = $new_path . $patch_info['name'];
-  $file->filesize = filesize($new_path . $patch_info['name']);
-  $file->status = FILE_STATUS_PERMANENT;
-
-  // Save the patch file.
-  // Oh, missing D7 file_save().
-  drupal_write_record('files', $file);
-  $file->fid = db_result(db_query("SELECT fid FROM {files} WHERE filepath = '%s'", $file->filepath));
-
-  // Create the patch node.
-  $patch = new stdClass();
-  $patch->type = 'patch';
-  $patch->language = 'en';
-  $patch->uid = $user->uid;
-  $patch->title = $patch_info['title'];
-  $patch->body = $patch_info['description'];
-  $patch->field_module[0]['value'] = $patch_info['module'];
-  if (!is_null($patch_info['issue']) && is_numeric($patch_info['issue'])) {
-    $patch->field_drupal_issue[0]['value'] = $patch_info['issue'];
-  }
-
-  // Attach the patch file to the node.
-  $patch->field_patch[0] = array(
-    'list' => 1,
-    'fid' => $file->fid,
-    'title' => $file->filename,
-    'filename' => $file->filename,
-    'filepath' => $file->filepath,
-    'filesize' => $file->filesize,
-    'mimetype' => $file->filemime,
-  );
-
-  // Save the patch node.
-  content_presave($patch);
-  node_save($patch);
-  content_insert($patch);
 
   // Make 'em happy!
   return TRUE;
@@ -121,56 +129,70 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
 
 
 /**
- * Helper function to remove the patch record.
+ * Helper function to remove patch records.
  *
  * @see http://drupal.org/node/292151
  * @see http://drupal.org/project/patch_manager
  */
 function _calendar_framework_patch_manager_delete() {
-  $path = file_directory_path() . '/' . _calendar_framework_patch_info('name');
-  $query = "SELECT ctp.nid
-            FROM {files} f
-            LEFT JOIN {content_type_patch} ctp ON f.fid = ctp.field_patch_fid
-            WHERE f.filepath = '%s'";
-  $nid = db_result(db_query($query, $path));
-  node_delete($nid);
+  $patches = _calendar_framework_patch_info();
+
+  foreach ($patches as $identifier => $patch) {
+    $path = file_directory_path() . '/' . $patch['name'];
+    $query = "SELECT ctp.nid
+              FROM {files} f
+              LEFT JOIN {content_type_patch} ctp ON f.fid = ctp.field_patch_fid
+              WHERE f.filepath = '%s'";
+    $nid = db_result(db_query($query, $path));
+    node_delete($nid);
+  }
 }
 
 
 /**
- * Helper function to return patch info.
+ * Helper function to return patches information.
  *
- * @param $type
- *   Filters function output:
- *   - all: Returns all information about all available patches.
- *   - name: Returns patch file name.
- *   - path: Returns patch file path.
- *   - target: Returns patch file target.
- *   - fingerprint: Returns patch fingerprint to check whether the patch is applied or not.
+ * @param $req
+ *   Imply whether to return all patches information or just the required ones.
  *
  * @return
  *   Either partial or full patch file info.
  */
-function _calendar_framework_patch_info($type = 'all') {
+function _calendar_framework_patch_info($req = FALSE) {
   $t = get_t();
-  
-  $info = array(
+  $required = $optional = array();
+
+  // Required patches.
+  $required['common.inc'] = array(
     'target' => 'includes/common.inc',
+    'target module' => 'core',
+    'target version' => '6.19',
     'name' => 'common.inc-format_date.d6.patch',
     'path' => drupal_get_path('module', 'calendar_framework') . '/patch/',
     'fingerprint' => 'foreach (module_implements(\'format_date\') as $module)',
     'description' => $t('Drupal core common.inc expansion to support hook_format_date() implementations.'),
     'title' => $t('Calendar Framework common.inc patch for core'),
-    'module' => 'core',
     'issue' => NULL,
   );
 
-  switch ($type) {
-    case 'all':
-      return $info;
+  // Optional patches.
+  $optional['uc_deliverytimeslot'] = array(
+    'target' => drupal_get_path('module', 'uc_deliverytimeslot') . '/uc_deliverytimeslot.module',
+    'target module' => 'uc_deliverytimeslot',
+    'target version' => '6.x-1.0-beta4',
+    'name' => 'uc_deliverytimeslot-format_date.d6.patch',
+    'path' => drupal_get_path('module', 'calendar_framework') . '/patch/',
+    'fingerprint' => '$row[] = array(\'data\' => t(\'!day\', array(\'!day\' => format_date($timestamps, \'custom\', \'l\'))),',
+    'description' => $t('Ubercart Delivery Timeslot module to use format_date() and support for calendar_framework.module.'),
+    'title' => $t('Calendar Framework patch for uc_deliverytimeslot'),
+    'issue' => '970768',
+  );
 
-    default:
-      return $info[$type];
+  if ($req) {
+    return $required;
+  }
+  else {
+    return $required + $optional;
   }
 }
 
