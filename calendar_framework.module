@@ -109,7 +109,7 @@ function calendar_framework_patch() {
   $patches = _calendar_framework_patch_info();
 
   foreach ($patches as $identifier => $patch) {
-    $patchdoq[$identifier] => array(
+    $patchdoq[$identifier] = array(
       'name' => $patch['title'],
       'description' => $patch['description'],
       'file' => $patch['path'] . $patch['name'],
