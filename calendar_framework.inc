@@ -78,6 +78,7 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
     // chmod($patch_info['target'], 0646);
 
     // Create the patch file.
+    // TODO: Check for duplicates.
     $file = new stdClass();
     $file->list = 1;
     $file->uid = $user->uid;
@@ -171,7 +172,7 @@ function _calendar_framework_patch_info($req = FALSE) {
     'path' => drupal_get_path('module', 'calendar_framework') . '/patch/',
     'fingerprint' => 'foreach (module_implements(\'format_date\') as $module)',
     'description' => $t('Drupal core common.inc expansion to support hook_format_date() implementations.'),
-    'title' => $t('Calendar Framework common.inc patch for core'),
+    'title' => $t('Calendar Framework common.inc patch for Drupal core'),
     'issue' => NULL,
   );
 
@@ -184,7 +185,7 @@ function _calendar_framework_patch_info($req = FALSE) {
     'path' => drupal_get_path('module', 'calendar_framework') . '/patch/',
     'fingerprint' => '$row[] = array(\'data\' => t(\'!day\', array(\'!day\' => format_date($timestamps, \'custom\', \'l\'))),',
     'description' => $t('Ubercart Delivery Timeslot module to use format_date() and support for calendar_framework.module.'),
-    'title' => $t('Calendar Framework patch for uc_deliverytimeslot'),
+    'title' => $t('Calendar Framework patch for Ubercart Delivery Timeslot module'),
     'issue' => '970768',
   );
 
