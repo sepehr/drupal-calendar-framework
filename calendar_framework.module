@@ -146,7 +146,7 @@ function calendar_framework_patch() {
  * @see calendar_framework_patch()
  * @see patch/common.inc-format_date.d6.patch
  */
-function calendar_framework_format_date($timestamp, $format, $timezone, $langcode) {
+function calendar_framework_format_date($timestamp, $format, $timezone = NULL, $langcode = NULL) {
   // Get the best-fit calendar for current
   // user/language and call its formatter callback.
   $calendar = _calendar_framework_select();
@@ -440,6 +440,7 @@ function calendar_framework_calendar_info() {
   $calendar['gregorian'] = array(
     'name' => t('Gregorian'),
     'format callback' => 'calendar_gregorian_formatter',
+    'month days callback' => 'calendar_gregorian_month_days',
   );
 
   return $calendar;
