@@ -94,7 +94,10 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
   $patch->uid = $user->uid;
   $patch->title = $patch_info['title'];
   $patch->body = $patch_info['description'];
-  $patch->field_module[0]['value'] = 'core';
+  $patch->field_module[0]['value'] = $patch_info['module'];
+  if (!is_null($patch_info['issue']) && is_numeric($patch_info['issue'])) {
+    $patch->field_drupal_issue[0]['value'] = $patch_info['issue'];
+  }
 
   // Attach the patch file to the node.
   $patch->field_patch[0] = array(
@@ -138,8 +141,8 @@ function _calendar_framework_patch_manager_delete() {
  * Helper function to return patch info.
  *
  * @param $type
- *   Patch info type to return.
- *   - all: Returns all information.
+ *   Filters function output:
+ *   - all: Returns all information about all available patches.
  *   - name: Returns patch file name.
  *   - path: Returns patch file path.
  *   - target: Returns patch file target.
@@ -150,6 +153,7 @@ function _calendar_framework_patch_manager_delete() {
  */
 function _calendar_framework_patch_info($type = 'all') {
   $t = get_t();
+  
   $info = array(
     'target' => 'includes/common.inc',
     'name' => 'common.inc-format_date.d6.patch',
@@ -157,6 +161,8 @@ function _calendar_framework_patch_info($type = 'all') {
     'fingerprint' => 'foreach (module_implements(\'format_date\') as $module)',
     'description' => $t('Drupal core common.inc expansion to support hook_format_date() implementations.'),
     'title' => $t('Calendar Framework common.inc patch for core'),
+    'module' => 'core',
+    'issue' => NULL,
   );
 
   switch ($type) {
