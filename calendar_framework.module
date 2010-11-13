@@ -104,16 +104,20 @@ function calendar_framework_calendar_title($identifier) {
 function calendar_framework_patch() {
   // Include helpers.
   module_load_include('inc', 'calendar_framework');
-  $patch_info = _calendar_framework_patch_info();
+  
+  $patchdoq = array();
+  $patches = _calendar_framework_patch_info();
 
-  return array(
-    'common.inc' => array(
-      'name' => $patch_info['title'],
-      'description' => $patch_info['description'],
-      'file' => $patch_info['path'] . $patch_info['name'],
+  foreach ($patches as $identifier => $patch) {
+    $patchdoq[$identifier] => array(
+      'name' => $patch['title'],
+      'description' => $patch['description'],
+      'file' => $patch['path'] . $patch['name'],
       'patch arguments' => '-p0',
-    ),
-  );
+    );
+  }
+
+  return $patchdoq;
 }
 
 
