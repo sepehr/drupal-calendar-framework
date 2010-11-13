@@ -28,10 +28,8 @@ function calendar_jalali_calendar_info() {
       'from gregorian' => 'calendar_jalali_convert',
       'to gregorian' => 'calendar_jalali_convert_reverse',
     ),
-    // Callbacks for calendar specifications:
-    'week days' => 'calendar_jalali_week_days',
-    'month days' => 'calendar_jalali_month_days',
-    'year months' => 'calendar_jalali_year_months',
+    // Callback calendar month days:
+    'month days callback' => 'calendar_jalali_month_days',
   );
 
   return $calendar;
