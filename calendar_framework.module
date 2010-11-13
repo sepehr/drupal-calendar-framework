@@ -38,9 +38,8 @@ function calendar_framework_init() {
   if (!_calendar_framework_patch_applied()) {
     drupal_set_message(t('Even though the <a href="!link">Calendar Framework</a> module is enabled, it is useless till you properly apply the patch.',
       array('!link' => url('admin/settings/date-time/calendars'))
-    ), 'warning');
-
-    drupal_set_message(t('And you are going to get this message till you apply the patch or disable the module.'), 'warning');
+    ), 'warning', FALSE);
+    drupal_set_message(t('And you are going to get this message till you apply the patch or disable the module.'), 'warning', FALSE);
   }
 }
 
