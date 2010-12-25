@@ -30,6 +30,9 @@ function calendar_framework_perm() {
  * Implements hook_init().
  *
  * @ingroup hook_implementation
+ * @todo
+ *   Move this warning functionality to Status Reports
+ *   page, and let the load off.
  */
 function calendar_framework_init() {
   // Include helpers.
@@ -161,7 +164,7 @@ function calendar_framework_format_date($timestamp, $format, $timezone = NULL, $
 /**
  * Implements hook_user().
  *
- * Adds a user specific calendar configuration.
+ * Adds user specific calendar configuration.
  *
  * @ingroup hook_implementation
  */
