@@ -64,6 +64,7 @@ function calendar_framework_menu() {
     'access arguments' => array('administer calendar framework'),
     'file' => 'calendar_framework.admin.inc',
     'type' => MENU_LOCAL_TASK,
+    'weight' => 3,
   );
 
   $items['admin/settings/date-time/calendars/%'] = array(
@@ -77,6 +78,16 @@ function calendar_framework_menu() {
   );
 
   return $items;
+}
+
+
+/**
+ * Implements hook_menu_alter().
+ */
+function calendar_framework_menu_alter($items) {
+  $items['admin/settings/date-time/date-time'] = $items['admin/settings/date-time'];
+  $items['admin/settings/date-time/date-time']['type'] = MENU_DEFAULT_LOCAL_TASK;
+  $items['admin/settings/date-time']['type'] = MENU_NORMAL_ITEM;
 }
 
 
