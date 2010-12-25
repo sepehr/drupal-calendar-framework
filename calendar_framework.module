@@ -30,6 +30,7 @@ function calendar_framework_perm() {
  * Implements hook_init().
  *
  * @ingroup hook_implementation
+ *
  * @todo
  *   Move this warning functionality to Status Reports
  *   page, and let the load off.
@@ -63,7 +64,6 @@ function calendar_framework_menu() {
     'access arguments' => array('administer calendar framework'),
     'file' => 'calendar_framework.admin.inc',
     'type' => MENU_LOCAL_TASK,
-    'weight' => 3,
   );
 
   $items['admin/settings/date-time/calendars/%'] = array(

@@ -51,6 +51,7 @@ function _calendar_framework_patch_applied() {
  *   The relative path of patch file.
  *
  * @see http://drupal.org/project/patch_manager
+ * @todo Watch for duplicate patch introductions!
  */
 function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patch_filepath = FALSE) {
   if (!module_exists('patch_manager')) {

@@ -3,3 +3,4 @@ name = "Calendar Framework"
 description = "Provides a clean, extensible multiple locale-independent calendar support."
 package = "Calendar Framework"
 core = 6.x
+
