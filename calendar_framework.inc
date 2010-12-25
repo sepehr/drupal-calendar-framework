@@ -136,8 +136,11 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
  * @see http://drupal.org/project/patch_manager
  */
 function _calendar_framework_patch_manager_delete() {
-  $patches = _calendar_framework_patch_info();
+  if (!module_exists('patch_manager')) {
+    return;
+  }
 
+  $patches = _calendar_framework_patch_info();
   foreach ($patches as $identifier => $patch) {
     $path = file_directory_path() . '/' . $patch['name'];
     $query = "SELECT ctp.nid
