@@ -93,7 +93,13 @@ function calendar_framework_uninstall() {
   }
 
   // Say bye to patch_manager.module.
+  // @todo: think! Do we really need to do this?
   _calendar_framework_patch_manager_delete();
+
+  // Remind about those patches.
+  if (_calendar_framework_patch_applied()) {
+    drupal_set_message(t('Since you just uninstalled the Calendar Framework, you might also want to reverse the applied patch(es).'));
+  }
 }
 
 
