@@ -1,3 +1,5 @@
+// $Id$
+
 Description
 ===========
 Provides a clean, extensive multiple calendar support.
@@ -8,4 +10,5 @@ THIS MODULE IS UNDER HEAVY DEVELOPMENT AND IS NOT USABLE AT THIS POINT.
 
 Author and Maintainer
 =====================
-sepehr (Sepehr Lajevardi)
+Sepehr Lajevardi (http://drupal.org/user/668010)
+
