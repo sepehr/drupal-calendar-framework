@@ -2,7 +2,7 @@
 
 Description
 ===========
-Provides a clean, extensive multiple calendar support.
+Provides a clean, extensible multiple locale-independent calendar support for Drupal.
 
 Important Notice
 ================
