@@ -326,6 +326,33 @@ function calendar_framework_default() {
 
 
 /**
+ * API function to call a calendar function.
+ *
+ * @param $function
+ *   Function "alias" to call.
+ * @param $args
+ *   An array arguments to be passed to $function.
+ * @param $calendar
+ *   Calendar name to call its $function.
+ *
+ * @retrun
+ *   The returned value od called calendar function or NULL on fail.
+ *
+ * @ingroup module_api
+ */
+function calendar_framework_call($function, $args = array(), $calendar = '') {
+  $calendar = empty($calendar) ?
+    calendar_framework_default() :
+    calendar_framework_calendars('calendar', $calendar);
+
+  if (isset($calendar[$function]) && function_exists($calendar[$function])) {
+    return call_user_func_array($calendar[$function], $args);
+  }
+  return NULL;
+}
+
+
+/**
  * Helper function to select the proper
  * calendar based on current user and language.
  *
