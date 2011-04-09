@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file
@@ -53,7 +52,7 @@ function calendar_islamic_admin_form_validate($form, &$form_state) {
  * Islamic calendar date formatter callback.
  *
  * @param $timestamp
- *   Unix timestamp to be formatted. 
+ *   Unix timestamp to be formatted.
  *   The proper timezone value has been added by the native format_date().
  * @param $type
  *   The format to use. Can be "small", "medium" or "large" for the preconfigured
@@ -84,4 +83,3 @@ function calendar_islamic_formatter($timestamp, $type, $format, $langcode, $cale
 function calendar_islamic_converter() {
   return FALSE;
 }
-

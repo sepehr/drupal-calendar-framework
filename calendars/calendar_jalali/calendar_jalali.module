@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file
@@ -535,4 +534,3 @@ function _calendar_jalali_potx($type = 'all', $destination = 'translation') {
     t('Esfand'),
   );
 }
-

@@ -1,4 +1,3 @@
-; $Id$
 name = "Jalali Calendar"
 description = "Jalali calendar (Solar Hijri) support for Calendar Framework."
 core = 6.x
