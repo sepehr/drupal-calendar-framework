@@ -235,6 +235,9 @@ function calendar_framework_calendar_form_submit($form, &$form_state) {
  * @ingroup form_theme
  */
 function theme_calendar_framework_languages_overview_form($form) {
+  // Load helpers.
+  module_load_include('inc', 'calendar_framework');
+
   $rows = array();
   $default = language_default();
 
@@ -253,8 +256,8 @@ function theme_calendar_framework_languages_overview_form($form) {
     // Set form table header.
     $rows[] = array(
       array(
-        'data' => drupal_render($form['enabled'][$name]),
-        'align' => 'center'
+        'align' => 'center',
+        'data'  => drupal_render($form['enabled'][$name]),
       ),
       check_plain($name),
       '<strong>' . drupal_render($form['name'][$name]) . '</strong>',
@@ -286,6 +289,15 @@ function theme_calendar_framework_languages_overview_form($form) {
   if (!isset($form['admin_language'][$name])) {
     unset($header[6]);
     $rows = array_map('array_filter', $rows);
+  }
+  // All; a waste of time!
+  // TODO: Rewrite the logic and avoid this if possible.
+  if (!_calendar_framework_patch_applied()) {
+    unset($header[7]);
+    // Temporary dirt:
+    foreach ($rows as $index => $row) {
+      unset($rows[$index][7]);
+    }
   }
 
   // Let it go!
