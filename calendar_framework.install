@@ -90,7 +90,7 @@ function calendar_framework_uninstall() {
   }
 
   // Say bye to patch_manager.module.
-  // @todo: think! Do we really need to do this?
+  // @TODO: think! Do we really need to do this?
   _calendar_framework_patch_manager_delete();
 
   // Remind about those patches.
