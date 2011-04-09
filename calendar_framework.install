@@ -113,8 +113,11 @@ function calendar_framework_requirements($phase) {
   module_load_include('inc', 'calendar_framework');
 
   $t = get_t();
-  $requirements = array();
   $patch_info = _calendar_framework_patch_info(TRUE);
+  $requirements = array('calendar_framework' => array(
+    'title' => $t('Calendar Framework'),
+    'value' => $t('Not installed correctly.'),
+  ));
   $requirements_error = $t('Calendar Framework <a href="!patch">patch</a> is not applied to <em>!patch_target</em> file, but it is <u>required</u> for the module to work. Please refer to <a href="!docs">Applying Patches Documentation</a> to be able to apply this patch correctly. Also, It is strongly recommended to use <a href="!patchdoq">Patchdoq</a> or <a href="!patchmanager">Patch Manager</a> to handle core and contrib patches.',
     array(
       '!patch' => $base_url . '/' . $patch_info['path'] . $patch_info['name'],
@@ -126,7 +129,8 @@ function calendar_framework_requirements($phase) {
   );
 
   if (_calendar_framework_patch_applied()) {
-    $requirements['calendar_framework'] = array('severity' => REQUIREMENT_OK);
+    $requirements['calendar_framework']['severity'] = REQUIREMENT_OK;
+    $requirements['calendar_framework']['value'] = $t('Installed correctly.');
     return $requirements;
   }
 
@@ -138,11 +142,10 @@ function calendar_framework_requirements($phase) {
     $requirements_severity = REQUIREMENT_ERROR;
   }
 
-  $requirements['calendar_framework'] = array(
+  $requirements['calendar_framework'] += array(
     'severity' => $requirements_severity,
     'description' => $requirements_error,
   );
 
   return $requirements;
 }
-
