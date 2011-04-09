@@ -193,11 +193,5 @@ function _calendar_framework_patch_info($req = FALSE) {
     'issue' => '970768',
   );
 
-  if ($req) {
-    return $required;
-  }
-  else {
-    return $required + $optional;
-  }
+  return $req ? $required : $required + $optional;
 }
-
