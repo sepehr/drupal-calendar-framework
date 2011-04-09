@@ -41,11 +41,13 @@ function calendar_framework_calendars_form() {
   );
 
   // Note for language specific calendar configs.
+  global $user;
   $form['calendar_framework_notice'] = array('#type' => 'item');
   if (function_exists('locale')) {
-    $form['calendar_framework_notice']['#value'] = t('<strong>Note</strong> that calendars are also <a href="!link">configurable per language</a> basis.',
-      array('!link' => url('admin/settings/language'))
-    );
+    $form['calendar_framework_notice']['#value'] = t('Calendars are also configurable per <a href="!locale-link">locale</a> and <a href="!user-link">user</a> basis.', array(
+      '!user-link' => url("user/{$user->uid}/edit"),
+      '!locale-link' => url('admin/settings/language'),
+    ));
   }
   else {
     $form['calendar_framework_notice']['#value'] = t('<strong>Note</strong> that calendars are also configurable per language basis if you had <a href="!link">Locale</a> module enabled.',
