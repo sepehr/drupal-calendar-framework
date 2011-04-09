@@ -14,7 +14,7 @@
  * @ingroup forms
  */
 function calendar_framework_calendars_form() {
-  $forms = $options = array();
+  $form = $options = array();
   $calendars = calendar_framework_calendars();
 
   // Generate site-wide options.
