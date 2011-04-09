@@ -2,12 +2,22 @@
 
 Description
 ===========
-Provides a clean, extensible multiple locale-independent calendar support for Drupal.
+Provides a clean, extensible locale-independent world calendar support for Drupal.
+
+Disclaimer
+==========
+This module is in an early development stage, It is not intended to be used in production.
+
+Installation
+============
 
 
-Important Notice
-================
-THIS MODULE IS UNDER HEAVY DEVELOPMENT AND IS NOT USABLE AT THIS POINT.
+Requirements
+============
+
+
+Dependencies
+============
 
 
 Author and Maintainer
