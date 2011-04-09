@@ -14,7 +14,25 @@
  * @ingroup forms
  */
 function calendar_framework_calendars_form() {
-  $form = $options = array();
+  $form = array();
+
+  // Include helpers.
+  module_load_include('inc', 'calendar_framework');
+  // Do not show the calendars form in case
+  // that the required core patch is not yet applied.
+  // TODO: Implement a requirements checker helper, etc.
+  if (!_calendar_framework_patch_applied()) {
+    $form['calendar_framework_error'] = array(
+      '#type'  => 'item',
+      '#value' => t('Calendar Framework is not correctly installed. Checkout the <a href="!link">status reports</a>.', array(
+        '!link' => url('admin/reports/status')
+      )),
+    );
+    // Let it be rendered.
+    return $form;
+  }
+
+  $options = array();
   $calendars = calendar_framework_calendars();
 
   // Generate site-wide options.
@@ -87,36 +105,42 @@ function calendar_framework_calendars_form_submit($form, &$form_state) {
  * @ingroup form_theme
  */
 function theme_calendar_framework_calendars_form($form) {
-  $rows = array();
-
-  // Set form table rows.
-  foreach ($form['sitewide'] as $name => $element) {
-    if (!isset($element['_id']) || !is_array($element['_id'])) {
-      continue;
+  // Include helpers.
+  module_load_include('inc', 'calendar_framework');
+  // Register theme callbacks only if the patch is applied.
+  if (_calendar_framework_patch_applied()) {
+    $rows = array();
+    // Set form table rows.
+    foreach ($form['sitewide'] as $name => $element) {
+      if (!isset($element['_id']) || !is_array($element['_id'])) {
+        continue;
+      }
+      $rows[] = array(
+        drupal_render($form['default_calendar'][$element['_id']['#value']]),
+        check_plain($name),
+        drupal_render($element['_config']),
+      );
     }
+    unset($form['sitewide']);
 
-    $rows[] = array(
-      drupal_render($form['default_calendar'][$element['_id']['#value']]),
-      check_plain($name),
-      drupal_render($element['_config']),
+    // Sets form table header.
+    $header = array(
+      t('Default'),
+      t('Calendar'),
+      array(
+        'colspan' => 1,
+        'data' => t('Actions'),
+      )
     );
+
+    $output  = '<h3>' . t('System Default Calendar') . '</h3>';
+    $output .= theme('table', $header, $rows);
+    $output .= drupal_render($form);
+    return $output;
   }
-  unset($form['sitewide']);
 
-  // Sets form table header.
-  $header = array(
-    t('Default'),
-    t('Calendar'),
-    array(
-      'colspan' => 1,
-      'data' => t('Actions'),
-    )
-  );
-
-  $output  = '<h3>' . t('System Default Calendar') . '</h3>';
-  $output .= theme('table', $header, $rows);
-  $output .= drupal_render($form);
-  return $output;
+  // Patch is not yet applied.
+  return drupal_render($form);
 }
 
 
