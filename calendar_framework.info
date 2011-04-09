@@ -1,4 +1,3 @@
-; $Id$
 name = "Calendar Framework"
 description = "Provides a clean, extensible and locale-independent world calendars support."
 package = "Calendar Framework"

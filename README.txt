@@ -1,5 +1,3 @@
-// $Id$
-
 Description
 ===========
 Provides a clean, extensible locale-independent world calendar support for Drupal.

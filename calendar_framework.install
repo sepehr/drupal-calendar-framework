@@ -1,11 +1,8 @@
 <?php
-// $Id$
 
 /**
  * @file
  * Implementation of Calendar Framework un/installation hooks.
- *
- * It's lookin' dirty because of its long messages, but it's not, in fact!
  */
 
 /**

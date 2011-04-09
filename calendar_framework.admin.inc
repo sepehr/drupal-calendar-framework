@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file
@@ -268,4 +267,3 @@ function theme_calendar_framework_languages_overview_form($form) {
   $output .= drupal_render($form);
   return $output;
 }
-

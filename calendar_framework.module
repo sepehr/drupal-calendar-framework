@@ -1,5 +1,4 @@
 <?php
-// $Id$
 
 /**
  * @file
@@ -118,7 +117,7 @@ function calendar_framework_calendar_title($identifier) {
 function calendar_framework_patch() {
   // Include helpers.
   module_load_include('inc', 'calendar_framework');
-  
+
   $patchdoq = array();
   $patches = _calendar_framework_patch_info();
 
@@ -529,4 +528,3 @@ function calendar_gregorian_formatter($timestamp, $type, $format, $langcode, $ca
 function calendar_gregorian_month_days() {
   return array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
 }
-
