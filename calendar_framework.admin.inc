@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Implements necessary callbacks for Calendar Framework administration forms.
+ * Implements necessary callbacks for Calendar Systems administration forms.
  */
 
 /**
@@ -13,18 +13,18 @@
  *
  * @ingroup forms
  */
-function calendar_framework_calendars_form() {
+function calendar_systems_calendars_form() {
   $form = array();
 
   // Include helpers.
-  module_load_include('inc', 'calendar_framework');
+  module_load_include('inc', 'calendar_systems');
   // Do not show the calendars form in case
   // that the required core patch is not yet applied.
   // TODO: Implement a requirements checker helper, etc.
-  if (!_calendar_framework_patch_applied()) {
-    $form['calendar_framework_error'] = array(
+  if (!_calendar_systems_patch_applied()) {
+    $form['calendar_systems_error'] = array(
       '#type'  => 'item',
-      '#value' => t('Calendar Framework is not correctly installed. Checkout the <a href="!link">status reports</a>.', array(
+      '#value' => t('Calendar Systems is not correctly installed. Checkout the <a href="!link">status reports</a>.', array(
         '!link' => url('admin/reports/status')
       )),
     );
@@ -33,7 +33,7 @@ function calendar_framework_calendars_form() {
   }
 
   $options = array();
-  $calendars = calendar_framework_calendars();
+  $calendars = calendar_systems_calendars();
 
   // Generate site-wide options.
   $form['sitewide'] = array();
@@ -54,21 +54,21 @@ function calendar_framework_calendars_form() {
 
   $form['default_calendar'] = array(
     '#type' => 'radios',
-    '#default_value' => variable_get('calendar_framework_default_calendar', 'gregorian'),
+    '#default_value' => variable_get('calendar_systems_default_calendar', 'gregorian'),
     '#options' => $options,
   );
 
   // Note for language specific calendar configs.
   global $user;
-  $form['calendar_framework_notice'] = array('#type' => 'item');
+  $form['calendar_systems_notice'] = array('#type' => 'item');
   if (function_exists('locale')) {
-    $form['calendar_framework_notice']['#value'] = t('Calendars are also configurable per <a href="!locale-link">locale</a> and <a href="!user-link">user</a> basis.', array(
+    $form['calendar_systems_notice']['#value'] = t('Calendars are also configurable per <a href="!locale-link">locale</a> and <a href="!user-link">user</a> basis.', array(
       '!user-link' => url("user/{$user->uid}/edit"),
       '!locale-link' => url('admin/settings/language'),
     ));
   }
   else {
-    $form['calendar_framework_notice']['#value'] = t('<strong>Note</strong> that calendars are also configurable per language basis if you had <a href="!link">Locale</a> module enabled.',
+    $form['calendar_systems_notice']['#value'] = t('<strong>Note</strong> that calendars are also configurable per language basis if you had <a href="!link">Locale</a> module enabled.',
       array('!link' => url('admin/build/modules'))
     );
   }
@@ -88,27 +88,27 @@ function calendar_framework_calendars_form() {
  *
  * @ingroup form_submit
  */
-function calendar_framework_calendars_form_submit($form, &$form_state) {
+function calendar_systems_calendars_form_submit($form, &$form_state) {
   if ($form_state['values']['default_calendar']) {
-    variable_set('calendar_framework_default_calendar', $form_state['values']['default_calendar']);
+    variable_set('calendar_systems_default_calendar', $form_state['values']['default_calendar']);
     drupal_set_message(t('System default calendar has been updated.'));
   }
 }
 
 
 /**
- * Theme callback for Calendar Framework admin form.
+ * Theme callback for Calendar Systems admin form.
  *
  * @param $form
  *   Admin form array.
  *
  * @ingroup form_theme
  */
-function theme_calendar_framework_calendars_form($form) {
+function theme_calendar_systems_calendars_form($form) {
   // Include helpers.
-  module_load_include('inc', 'calendar_framework');
+  module_load_include('inc', 'calendar_systems');
   // Register theme callbacks only if the patch is applied.
-  if (_calendar_framework_patch_applied()) {
+  if (_calendar_systems_patch_applied()) {
     $rows = array();
     // Set form table rows.
     foreach ($form['sitewide'] as $name => $element) {
@@ -155,8 +155,8 @@ function theme_calendar_framework_calendars_form($form) {
  *
  * @ingroup forms
  */
-function calendar_framework_calendar_form(&$form_state, $identifier) {
-  $calendar = calendar_framework_calendars('calendar', $identifier);
+function calendar_systems_calendar_form(&$form_state, $identifier) {
+  $calendar = calendar_systems_calendars('calendar', $identifier);
 
   if ($calendar && function_exists($calendar['config callback'])) {
     $form = $calendar['config callback']($calendar['config']);
@@ -174,7 +174,7 @@ function calendar_framework_calendar_form(&$form_state, $identifier) {
 
     // Set calendar configuration page title.
     drupal_set_title(t('@calendar Configuration',
-      array('@calendar' => calendar_framework_calendar_title($identifier))
+      array('@calendar' => calendar_systems_calendar_title($identifier))
     ));
 
     return $form;
@@ -190,7 +190,7 @@ function calendar_framework_calendar_form(&$form_state, $identifier) {
  *
  * @ingroup form_validate
  */
-function calendar_framework_calendar_form_validate($form, &$form_state) {
+function calendar_systems_calendar_form_validate($form, &$form_state) {
   // Pass to calendar form validator.
   $function = $form_state['values']['calendar']['config callback'] . '_validate';
   if (function_exists($function)) {
@@ -204,7 +204,7 @@ function calendar_framework_calendar_form_validate($form, &$form_state) {
  *
  * @ingroup form_submit
  */
-function calendar_framework_calendar_form_submit($form, &$form_state) {
+function calendar_systems_calendar_form_submit($form, &$form_state) {
   $calendar = $form_state['values']['calendar'];
 
   // Saving necessary configs.
@@ -215,11 +215,11 @@ function calendar_framework_calendar_form_submit($form, &$form_state) {
     $form_state['values']['form_token'],
     $form_state['values']['form_build_id']
   );
-  variable_set('calendar_framework_settings_' . $calendar['identifier'], $form_state['values']);
+  variable_set('calendar_systems_settings_' . $calendar['identifier'], $form_state['values']);
 
   $form_state['redirect'] = 'admin/settings/date-time/calendars';
   drupal_set_message(t('Configuration for <em>@calendar</em> has been successfully saved.',
-    array('@calendar' => calendar_framework_calendar_title($calendar['identifier']))
+    array('@calendar' => calendar_systems_calendar_title($calendar['identifier']))
   ));
 }
 
@@ -234,9 +234,9 @@ function calendar_framework_calendar_form_submit($form, &$form_state) {
  *
  * @ingroup form_theme
  */
-function theme_calendar_framework_languages_overview_form($form) {
+function theme_calendar_systems_languages_overview_form($form) {
   // Load helpers.
-  module_load_include('inc', 'calendar_framework');
+  module_load_include('inc', 'calendar_systems');
 
   $rows = array();
   $default = language_default();
@@ -265,7 +265,7 @@ function theme_calendar_framework_languages_overview_form($form) {
       drupal_render($form['direction'][$name]),
       drupal_render($form['site_default'][$name]),
       drupal_render($form['admin_language'][$name]),
-      drupal_render($form['calendar_framework_languages'][$name]),
+      drupal_render($form['calendar_systems_languages'][$name]),
       drupal_render($form['weight'][$name]),
       l(t('edit'), 'admin/settings/language/edit/'. $name) . (($name != 'en' && $name != $default->language) ? ' ' . l(t('delete'), 'admin/settings/language/delete/' . $name) : ''),
     );
@@ -292,7 +292,7 @@ function theme_calendar_framework_languages_overview_form($form) {
   }
   // All; a waste of time!
   // TODO: Rewrite the logic and avoid this if possible.
-  if (!_calendar_framework_patch_applied()) {
+  if (!_calendar_systems_patch_applied()) {
     unset($header[7]);
     // Temporary dirt:
     foreach ($rows as $index => $row) {
