@@ -2,15 +2,15 @@
 
 /**
  * @file
- * Implementation of Calendar Framework un/installation hooks.
+ * Implementation of Calendar Systems un/installation hooks.
  */
 
 /**
  * Implements hook_enable().
  */
-function calendar_framework_enable() {
+function calendar_systems_enable() {
   // Include helpers.
-  module_load_include('inc', 'calendar_framework');
+  module_load_include('inc', 'calendar_systems');
 
   // I know, I'm talking too much!
   $notice = t('Also notice that you need to make <em>patch target files</em> writable for webserver (0646) or you cannot patch them via the web interface of these modules.');
@@ -25,7 +25,7 @@ function calendar_framework_enable() {
     )
   );
 
-  if (!_calendar_framework_patch_applied()) {
+  if (!_calendar_systems_patch_applied()) {
     drupal_set_message($warning, 'warning');
     drupal_set_message($advice, 'warning');
     drupal_set_message($notice, 'warning');
@@ -42,22 +42,22 @@ function calendar_framework_enable() {
 /**
  * Implements hook_install().
  */
-function calendar_framework_install() {
+function calendar_systems_install() {
   if (module_exists('patch_manager')) {
     // Include helpers.
-    module_load_include('inc', 'calendar_framework');
+    module_load_include('inc', 'calendar_systems');
 
     // Get proper translator function.
     $t = get_t();
 
     // Introduce the patch to patch_manager.module.
-    if (_calendar_framework_patch_manager_insert()) {
+    if (_calendar_systems_patch_manager_insert()) {
       // Set the proper message.
       $message = $t('Calendar Framework patch has been successfully copied to files directory, Also <em>introduced</em> to <a href ="!patchmanager">Patch Manager</a>.',
         array('!patchmanager' => url('admin/build/patch'))
       );
 
-      if (_calendar_framework_patch_applied()) {
+      if (_calendar_systems_patch_applied()) {
         $type = 'status';
         $message .= ' ' . $t('Anyway you need not to re-apply the patch.');
       }
@@ -75,26 +75,26 @@ function calendar_framework_install() {
 /**
  * Implements hook_uninstall().
  */
-function calendar_framework_uninstall() {
+function calendar_systems_uninstall() {
   // Module API is not available at this point. Using
   // db_query() and LIKE is un-encouraged. So, load the API.
-  drupal_load('module', 'calendar_framework');
+  drupal_load('module', 'calendar_systems');
 
   // Also include module helpers.
-  module_load_include('inc', 'calendar_framework');
+  module_load_include('inc', 'calendar_systems');
 
   // Remove all calendars settings.
-  $calendars = calendar_framework_calendars();
+  $calendars = calendar_systems_calendars();
   foreach ($calendars as $identifer => $info) {
-    variable_del('calendar_framework_settings_' . $identifier);
+    variable_del('calendar_systems_settings_' . $identifier);
   }
 
   // Say bye to patch_manager.module.
   // @TODO: think! Do we really need to do this?
-  _calendar_framework_patch_manager_delete();
+  _calendar_systems_patch_manager_delete();
 
   // Remind about those patches.
-  if (_calendar_framework_patch_applied()) {
+  if (_calendar_systems_patch_applied()) {
     drupal_set_message(t('Since you just uninstalled the Calendar Framework, you might also want to reverse the applied patch(es).'));
   }
 }
@@ -103,15 +103,15 @@ function calendar_framework_uninstall() {
 /**
  * Implements hook_requirements().
  */
-function calendar_framework_requirements($phase) {
+function calendar_systems_requirements($phase) {
   global $base_url;
 
   // Include helpers.
-  module_load_include('inc', 'calendar_framework');
+  module_load_include('inc', 'calendar_systems');
 
   $t = get_t();
-  $patch_info = _calendar_framework_patch_info(TRUE);
-  $requirements = array('calendar_framework' => array(
+  $patch_info = _calendar_systems_patch_info(TRUE);
+  $requirements = array('calendar_systems' => array(
     'title' => $t('Calendar Framework'),
     'value' => $t('Not installed correctly.'),
   ));
@@ -125,9 +125,9 @@ function calendar_framework_requirements($phase) {
     )
   );
 
-  if (_calendar_framework_patch_applied()) {
-    $requirements['calendar_framework']['severity'] = REQUIREMENT_OK;
-    $requirements['calendar_framework']['value'] = $t('Installed correctly.');
+  if (_calendar_systems_patch_applied()) {
+    $requirements['calendar_systems']['severity'] = REQUIREMENT_OK;
+    $requirements['calendar_systems']['value'] = $t('Installed correctly.');
     return $requirements;
   }
 
@@ -139,7 +139,7 @@ function calendar_framework_requirements($phase) {
     $requirements_severity = REQUIREMENT_ERROR;
   }
 
-  $requirements['calendar_framework'] += array(
+  $requirements['calendar_systems'] += array(
     'severity' => $requirements_severity,
     'description' => $requirements_error,
   );
