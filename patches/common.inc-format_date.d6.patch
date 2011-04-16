@@ -5,10 +5,10 @@ index 2ca8c72..ce8fef8 100644
 @@ -1341,6 +1341,18 @@ function format_date($timestamp, $type = 'medium', $format = '', $timezone = NUL
        $format = variable_get('date_format_medium', 'D, m/d/Y - H:i');
    }
- 
+
 +  foreach (module_implements('format_date') as $module) {
 +    // date.module implements a date_format_date() function, skip it.
-+    if ($module != 'date') {
++    if ($module != 'date' && $module != 'reldate') {
 +      $function = $module . '_format_date';
 +      $date = $function($timestamp, $format, $timezone, $langcode);
 +
@@ -21,3 +21,4 @@ index 2ca8c72..ce8fef8 100644
    $max = strlen($format);
    $date = '';
    for ($i = 0; $i < $max; $i++) {
+
