@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Implements necessary hooks of Calendar Framework module, to support Islamic Calendar.
+ * Implements necessary hooks of Calendar Systems module, to support Islamic Calendar.
  */
 
 /**
