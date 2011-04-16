@@ -1,4 +1,4 @@
-name = "Calendar Framework"
-description = "Provides a clean, extensible and locale-independent world calendars support."
-package = "Calendar Framework"
+name = "Calendar Systems"
+description = "Provides a clean, extensible and locale-independent multi calendars support."
+package = "Calendar Systems"
 core = 6.x
