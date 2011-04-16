@@ -14,7 +14,7 @@ function calendar_systems_enable() {
 
   // I know, I'm talking too much!
   $notice = t('Also notice that you need to make <em>patch target files</em> writable for webserver (0646) or you cannot patch them via the web interface of these modules.');
-  $warning = t('Even though the <a href="!link">Calendar Framework</a> module is now enabled, it is useless till you properly apply the patch.',
+  $warning = t('Even though the <a href="!link">Calendar Systems</a> module is now enabled, it is useless till you properly apply the patch.',
     array('!link' => url('admin/settings/date-time/calendars'))
   );
 
@@ -31,7 +31,7 @@ function calendar_systems_enable() {
     drupal_set_message($notice, 'warning');
   }
   else {
-    drupal_set_message(t('<a href="!link">Calendar Framework</a> is now successfully installed and running. The patch is applied to the system.',
+    drupal_set_message(t('<a href="!link">Calendar Systems</a> is now successfully installed and running. The patch is applied to the system.',
       array('!link' => url('admin/settings/date-time/calendars'))
     ));
     drupal_set_message($advice);
@@ -53,7 +53,7 @@ function calendar_systems_install() {
     // Introduce the patch to patch_manager.module.
     if (_calendar_systems_patch_manager_insert()) {
       // Set the proper message.
-      $message = $t('Calendar Framework patch has been successfully copied to files directory, Also <em>introduced</em> to <a href ="!patchmanager">Patch Manager</a>.',
+      $message = $t('Calendar Systems patch has been successfully copied to files directory, Also <em>introduced</em> to <a href ="!patchmanager">Patch Manager</a>.',
         array('!patchmanager' => url('admin/build/patch'))
       );
 
@@ -95,7 +95,7 @@ function calendar_systems_uninstall() {
 
   // Remind about those patches.
   if (_calendar_systems_patch_applied()) {
-    drupal_set_message(t('Since you just uninstalled the Calendar Framework, you might also want to reverse the applied patch(es).'));
+    drupal_set_message(t('Since you just uninstalled the Calendar Systems, you might also want to reverse the applied patch(es).'));
   }
 }
 
@@ -112,7 +112,7 @@ function calendar_systems_requirements($phase) {
   $t = get_t();
   $patch_info = _calendar_systems_patch_info(TRUE);
   $requirements = array('calendar_systems' => array(
-    'title' => $t('Calendar Framework'),
+    'title' => $t('Calendar Systems'),
     'value' => $t('Not installed correctly.'),
   ));
   $requirements_error = $t('Calendar Systems <a href="!patch">patch</a> is not applied to <em>!patch_target</em> file, but it is <u>required</u> for the module to work. Please refer to <a href="!docs">Applying Patches Documentation</a> to be able to apply this patch correctly. Also, It is strongly recommended to use <a href="!patchdoq">Patchdoq</a> or <a href="!patchmanager">Patch Manager</a> to handle core and contrib patches.',
