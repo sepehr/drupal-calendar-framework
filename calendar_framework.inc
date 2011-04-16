@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Calendar Framework helper functions which need to be used in various module files.
+ * Calendar Systems helper functions which need to be used in various module files.
  */
 
 /**
@@ -14,8 +14,8 @@
  *
  * @todo Check whether the runkit extension is loaded to do a dirty magic.
  */
-function _calendar_framework_patch_applied() {
-  $patches = _calendar_framework_patch_info(TRUE);
+function _calendar_systems_patch_applied() {
+  $patches = _calendar_systems_patch_info(TRUE);
 
   foreach ($patches as $identifier => $patch) {
     // Patch target relative path to Drupal base.
@@ -52,13 +52,13 @@ function _calendar_framework_patch_applied() {
  * @see http://drupal.org/project/patch_manager
  * @todo Watch for duplicate patch introductions!
  */
-function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patch_filepath = FALSE) {
+function _calendar_systems_patch_manager_insert($patch_filename = FALSE, $patch_filepath = FALSE) {
   if (!module_exists('patch_manager')) {
     return;
   }
 
   global $user;
-  $patches = _calendar_framework_patch_info();
+  $patches = _calendar_systems_patch_info();
 
   foreach ($patches as $identifier => $patch) {
     // Copy the patch to Drupal files directory,
@@ -67,7 +67,7 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
     $new_path = file_directory_path() . '/';
     if (!@copy($patch['path'] . $patch['name'], $new_path . $patch['name'])) {
       $t = get_t();
-      drupal_set_message($t('You have <a href="!patchmanager">Patch Manger</a> installed but we could not copy the Calendar Framework patch to files directory. Please check directory permissions and reinstall the module.',
+      drupal_set_message($t('You have <a href="!patchmanager">Patch Manger</a> installed but we could not copy the Calendar Systems patch to files directory. Please check directory permissions and reinstall the module.',
         array('!patchmanager' => url('admin/build/patch'))
       ), 'warning');
 
@@ -135,12 +135,12 @@ function _calendar_framework_patch_manager_insert($patch_filename = FALSE, $patc
  * @see http://drupal.org/node/292151
  * @see http://drupal.org/project/patch_manager
  */
-function _calendar_framework_patch_manager_delete() {
+function _calendar_systems_patch_manager_delete() {
   if (!module_exists('patch_manager')) {
     return;
   }
 
-  $patches = _calendar_framework_patch_info();
+  $patches = _calendar_systems_patch_info();
   foreach ($patches as $identifier => $patch) {
     $path = file_directory_path() . '/' . $patch['name'];
     $query = "SELECT ctp.nid
@@ -162,7 +162,7 @@ function _calendar_framework_patch_manager_delete() {
  * @return
  *   Either partial or full patch file info.
  */
-function _calendar_framework_patch_info($req = FALSE) {
+function _calendar_systems_patch_info($req = FALSE) {
   $t = get_t();
   $required = $optional = array();
 
@@ -172,10 +172,10 @@ function _calendar_framework_patch_info($req = FALSE) {
     'target module' => 'core',
     'target version' => '6.19',
     'name' => 'common.inc-format_date.d6.patch',
-    'path' => drupal_get_path('module', 'calendar_framework') . '/patch/',
+    'path' => drupal_get_path('module', 'calendar_systems') . '/patch/',
     'fingerprint' => 'foreach (module_implements(\'format_date\') as $module)',
     'description' => $t('Drupal core common.inc expansion to support hook_format_date() implementations.'),
-    'title' => $t('Calendar Framework common.inc patch for Drupal core'),
+    'title' => $t('Calendar Systems common.inc patch for Drupal core'),
     'issue' => NULL,
   );
 
@@ -185,10 +185,10 @@ function _calendar_framework_patch_info($req = FALSE) {
     'target module' => 'uc_deliverytimeslot',
     'target version' => '6.x-1.0-beta4',
     'name' => 'uc_deliverytimeslot-format_date.d6.patch',
-    'path' => drupal_get_path('module', 'calendar_framework') . '/patch/',
+    'path' => drupal_get_path('module', 'calendar_systems') . '/patch/',
     'fingerprint' => '$row[] = array(\'data\' => t(\'!day\', array(\'!day\' => format_date($timestamps, \'custom\', \'l\'))),',
-    'description' => $t('Ubercart Delivery Timeslot module to use format_date() and support for calendar_framework.module.'),
-    'title' => $t('Calendar Framework patch for Ubercart Delivery Timeslot module'),
+    'description' => $t('Ubercart Delivery Timeslot module to use format_date() and support for calendar_systems.module.'),
+    'title' => $t('Calendar Systems patch for Ubercart Delivery Timeslot module'),
     'issue' => '970768',
   );
 
