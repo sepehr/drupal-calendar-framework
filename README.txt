@@ -18,6 +18,11 @@ Dependencies
 ============
 
 
-Author and Maintainer
-=====================
-Sepehr Lajevardi (http://drupal.org/user/668010)
+Sponsors
+========
+
+
+Authors and Maintainers
+=======================
+Sina Salek - http://drupal.org/user/52244
+Sepehr Lajevardi - http://drupal.org/user/668010
