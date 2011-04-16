@@ -1,5 +1,5 @@
 name = "Jalali Calendar"
-description = "Jalali calendar (Solar Hijri) support for Calendar Framework."
+description = "Jalali calendar (Solar Hijri) support for Calendar Systems."
 core = 6.x
-package = "Calendar Framework"
-dependencies[] = calendar_framework
+package = "Calendar Systems"
+dependencies[] = calendar_systems
