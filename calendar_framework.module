@@ -6,13 +6,6 @@
  */
 
 /**
- * Thanks to the crowd at developmentseed,
- * There are some patterns here inspired by the SMS Framework.
- *
- * @see http://drupal.org/project/smsframework
- */
-
-/**
  * Implements hook_perm().
  *
  * @ingroup hook_implementation
