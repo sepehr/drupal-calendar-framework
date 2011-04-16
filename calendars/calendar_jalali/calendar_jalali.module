@@ -259,7 +259,7 @@ function calendar_jalali_convert_reverse($year, $month, $day) {
  */
 function calendar_jalali_formatter($timestamp, $format, $timezone = 0, $langcode = NULL, $calendar = NULL) {
   $date = '';
-  list($year, $month, $day) = explode('~', calendar_framework_formatter($timestamp, 'Y~n~j'));
+  list($year, $month, $day) = explode('~', calendar_systems_formatter($timestamp, 'Y~n~j'));
   list($jyear, $jmonth, $jday) = calendar_jalali_convert($year, $month, $day);
 
   $max = strlen($format);
@@ -290,7 +290,7 @@ function calendar_jalali_formatter($timestamp, $format, $timezone = 0, $langcode
 
       case 'a':
       case 'A':
-        $default = calendar_framework_formatter($timestamp, $format[$i]);
+        $default = calendar_systems_formatter($timestamp, $format[$i]);
         if ($calendar['config']['calendar_jalali_translate_meridiem']) {
           $case = ($format[$i] == 'a') ? 'lower' : 'upper';
           $meridiems = _calendar_jalali_t('meridiem_' . $case);
@@ -318,7 +318,7 @@ function calendar_jalali_formatter($timestamp, $format, $timezone = 0, $langcode
         break;
 
       case 'w':
-        $date .= (calendar_framework_formatter($timestamp, 'w') + 1) % 7;
+        $date .= (calendar_systems_formatter($timestamp, 'w') + 1) % 7;
         break;
 
       case 'r':
@@ -381,7 +381,7 @@ function calendar_jalali_formatter($timestamp, $format, $timezone = 0, $langcode
         break;
 
       default:
-        $date .= calendar_framework_formatter($timestamp, $format[$i], $timezone);
+        $date .= calendar_systems_formatter($timestamp, $format[$i], $timezone);
     }
   }
 
