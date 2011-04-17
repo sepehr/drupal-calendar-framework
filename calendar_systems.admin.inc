@@ -16,15 +16,14 @@
 function calendar_systems_calendars_form() {
   $form = array();
 
-  // Include helpers.
+  // Include patch helpers.
   module_load_include('patch.inc', 'calendar_systems');
   // Do not show the calendars form in case
-  // that the required core patch is not yet applied.
-  // TODO: Implement a requirements checker helper, etc.
+  // that the required core patches is not yet applied.
   if (!_calendar_systems_patches_applied()) {
     $form['calendar_systems_error'] = array(
       '#type'  => 'item',
-      '#value' => t('Calendar Systems is not correctly installed. Checkout the <a href="!link">status reports</a>.', array(
+      '#value' => t('Calendar Systems is not correctly installed. Please checkout the <a href="!link">status reports</a>.', array(
         '!link' => url('admin/reports/status')
       )),
     );
@@ -33,18 +32,18 @@ function calendar_systems_calendars_form() {
   }
 
   $options = array();
+  // Get a list of available calendars.
   $calendars = calendar_systems_calendars();
 
   // Generate site-wide options.
   $form['sitewide'] = array();
   foreach ($calendars as $identifier => $calendar) {
     $options[$identifier] = '';
-
     // Add fake elements to be themed later on.
     $form['sitewide'][$calendar['name']]['_id'] = array(
       '#value' => $identifier,
     );
-
+    // Also add calendar configuration link.
     $form['sitewide'][$calendar['name']]['_config'] = array(
       '#value' => function_exists($calendar['config callback']) ?
         l(t('Configuration'), 'admin/settings/date-time/calendars/' . $identifier) :
@@ -52,25 +51,28 @@ function calendar_systems_calendars_form() {
     );
   }
 
+  // Append the default calendar radio group.
   $form['default_calendar'] = array(
     '#type' => 'radios',
     '#default_value' => variable_get('calendar_systems_default_calendar', 'gregorian'),
     '#options' => $options,
   );
 
-  // Note for language specific calendar configs.
   global $user;
+  // Note for locale and user specific calendar configs.
   $form['calendar_systems_notice'] = array('#type' => 'item');
+  // If the locale module is available:
   if (function_exists('locale')) {
     $form['calendar_systems_notice']['#value'] = t('Calendars are also configurable per <a href="!locale-link">locale</a> and <a href="!user-link">user</a> basis.', array(
       '!user-link' => url("user/{$user->uid}/edit"),
       '!locale-link' => url('admin/settings/language'),
     ));
   }
+  // Otherwise:
   else {
-    $form['calendar_systems_notice']['#value'] = t('<strong>Note</strong> that calendars are also configurable per language basis if you had <a href="!link">Locale</a> module enabled.',
-      array('!link' => url('admin/build/modules'))
-    );
+    $form['calendar_systems_notice']['#value'] = t('Calendars are also configurable per <a href="!user-link">user</a> basis. If you had the locale module enabled, you could also configure them per locale basis.', array(
+      '!user-link' => url("user/{$user->uid}/edit"),
+    ));
   }
 
   // Append the submit button.
