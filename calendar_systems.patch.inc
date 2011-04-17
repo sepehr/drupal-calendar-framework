@@ -99,6 +99,47 @@ function _calendar_systems_patches_applied() {
 }
 
 /**
+ * Internal helper of hook_requirements() implementation.
+ *
+ * @return
+ *   An array requirements checking results as per required by
+ *   hook_requirements() implementation.
+ */
+function _calendar_systems_patches_requirements() {
+  $t = get_t();
+  // Requirements array as per required by hook_requirements().
+  $requirements = array('calendar_systems' => array(
+    'title' => $t('Calendar Systems'),
+    'value' => $t('Not installed correctly.'),
+  ));
+  // The message to be shown when the requirements are not met.
+  $error = $t('Calendar Systems required patches are not applied yet. Please read the installation docs.');
+
+  // Check if the required patches are currently applied.
+  if (_calendar_systems_patches_applied()) {
+    $requirements['calendar_systems']['severity'] = REQUIREMENT_OK;
+    $requirements['calendar_systems']['value'] = $t('Installed correctly.');
+    return $requirements;
+  }
+
+  // Allow user to enable the module if there are a 'patch manager' module available,
+  // even if the requirements are not met yet.
+  if ($phase == 'install' && (module_exists('patchdoq') || module_exists('patch_manager'))) {
+    $severity = REQUIREMENT_WARNING;
+  }
+  // Halt the installation otherwise.
+  else {
+    $severity = REQUIREMENT_ERROR;
+  }
+
+  $requirements['calendar_systems'] += array(
+    'severity' => $severity,
+    'description' => $error,
+  );
+  return $requirements;
+}
+
+/**
  * Internal helper to create patch records for the lazy patch_manager project.
  *
  * Saves a "patch" typed node as per required by patch_manager.module once the

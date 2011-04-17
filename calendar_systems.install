@@ -9,7 +9,7 @@
  * Implements hook_enable().
  */
 function calendar_systems_enable() {
-  // Include helpers.
+  // Include patch helpers.
   module_load_include('inc', 'calendar_systems.patch');
 
   // I know, I'm talking too much!
@@ -80,7 +80,7 @@ function calendar_systems_uninstall() {
   // db_query() and LIKE is un-encouraged. So, load the API.
   drupal_load('module', 'calendar_systems');
 
-  // Also include module helpers.
+  // Also include module patch helpers.
   module_load_include('inc', 'calendar_systems.patch');
 
   // Remove all calendars settings.
@@ -104,45 +104,8 @@ function calendar_systems_uninstall() {
  * Implements hook_requirements().
  */
 function calendar_systems_requirements($phase) {
-  global $base_url;
-
-  // Include helpers.
+  // Include patch helpers.
   module_load_include('inc', 'calendar_systems.patch');
-
-  $t = get_t();
-  $patch_info = _calendar_systems_patch_info(TRUE);
-  $requirements = array('calendar_systems' => array(
-    'title' => $t('Calendar Systems'),
-    'value' => $t('Not installed correctly.'),
-  ));
-  $requirements_error = $t('Calendar Systems <a href="!patch">patch</a> is not applied to <em>!patch_target</em> file, but it is <u>required</u> for the module to work. Please refer to <a href="!docs">Applying Patches Documentation</a> to be able to apply this patch correctly. Also, It is strongly recommended to use <a href="!patchdoq">Patchdoq</a> or <a href="!patchmanager">Patch Manager</a> to handle core and contrib patches.',
-    array(
-      '!patch' => $base_url . '/' . $patch_info['path'] . $patch_info['name'],
-      '!patch_target' => $patch_info['target'],
-      '!docs' => 'http://drupal.org/patch/apply',
-      '!patchdoq' => module_exists('patchdoq') ? url('admin/build/patchdoq') : 'http://drupal.org/project/patchdoq',
-      '!patchmanager' => module_exists('patch_manager') ? url('admin/build/patch') : 'http://drupal.org/project/patch_manager',
-    )
-  );
-
-  if (_calendar_systems_patch_applied()) {
-    $requirements['calendar_systems']['severity'] = REQUIREMENT_OK;
-    $requirements['calendar_systems']['value'] = $t('Installed correctly.');
-    return $requirements;
-  }
-
-  // Allow user to enable the module if there are a 'patch manager' module available.
-  if ($phase == 'install' && (module_exists('patchdoq') || module_exists('patch_manager'))) {
-    $requirements_severity = REQUIREMENT_WARNING;
-  }
-  else {
-    $requirements_severity = REQUIREMENT_ERROR;
-  }
-
-  $requirements['calendar_systems'] += array(
-    'severity' => $requirements_severity,
-    'description' => $requirements_error,
-  );
-
-  return $requirements;
+  // Return the requirements array.
+  return _calendar_systems_patches_requirements();
 }
