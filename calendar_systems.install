@@ -6,36 +6,13 @@
  */
 
 /**
- * Implements hook_enable().
+ * Implements hook_requirements().
  */
-function calendar_systems_enable() {
+function calendar_systems_requirements($phase) {
   // Include patch helpers.
-  module_load_include('inc', 'calendar_systems.patch');
-
-  // I know, I'm talking too much!
-  $notice = t('Also notice that you need to make <em>patch target files</em> writable for webserver (0646) or you cannot patch them via the web interface of these modules.');
-  $warning = t('Even though the <a href="!link">Calendar Systems</a> module is now enabled, it is useless till you properly apply the patch.',
-    array('!link' => url('admin/settings/date-time/calendars'))
-  );
-
-  $advice = t('It is strongly recommended to use <a href="!patchdoq">Patchdoq</a> or <a href="!patchmanager">Patch Manager</a> to handle core and contrib patches.',
-    array(
-      '!patchdoq' => module_exists('patchdoq') ? url('admin/build/patchdoq') : 'http://drupal.org/project/patchdoq',
-      '!patchmanager' => module_exists('patch_manager') ? url('admin/build/patch') : 'http://drupal.org/project/patch_manager',
-    )
-  );
-
-  if (!_calendar_systems_patch_applied()) {
-    drupal_set_message($warning, 'warning');
-    drupal_set_message($advice, 'warning');
-    drupal_set_message($notice, 'warning');
-  }
-  else {
-    drupal_set_message(t('<a href="!link">Calendar Systems</a> is now successfully installed and running. The patch is applied to the system.',
-      array('!link' => url('admin/settings/date-time/calendars'))
-    ));
-    drupal_set_message($advice);
-  }
+  module_load_include('patch.inc', 'calendar_systems');
+  // Return the requirements array.
+  return _calendar_systems_patches_requirements();
 }
 
 /**
@@ -46,17 +23,17 @@ function calendar_systems_enable() {
 function calendar_systems_install() {
   if (module_exists('patch_manager')) {
     // Include patch helpers.
-    module_load_include('inc', 'calendar_systems.patch');
+    module_load_include('patch.inc', 'calendar_systems');
 
     $t = get_t();
     // Introduce module patches to patch_manager.module.
     if (_calendar_systems_patches_pm_insert()) {
       // Set the proper message.
-      $message = $t('Calendar Systems patch has been successfully copied to files directory, Also <em>introduced</em> to <a href ="!patchmanager">Patch Manager</a>.',
-        array('!patchmanager' => url('admin/build/patch'))
+      $message = $t('Calendar Systems patch has been successfully copied to files directory, Also <em>introduced</em> to <a href ="!patch_manager">Patch Manager</a>.',
+        array('!patch_manager' => url('admin/build/patch'))
       );
       // And notify the user based on environement situation.
-      if (_calendar_systems_patch_applied()) {
+      if (_calendar_systems_patches_applied()) {
         drupal_set_message($message . ' ' . $t('Anyway you need not to re-apply the patch.'));
       }
       else {
@@ -66,8 +43,8 @@ function calendar_systems_install() {
     // There were a problem introducing
     // patches to the patch_manager.module.
     else {
-      drupal_set_message($t('You have <a href="!patchmanager">Patch Manger</a> installed but we could not copy the Calendar Systems required patches to files directory. Please check permissions and reinstall the module.',
-        array('!patchmanager' => url('admin/build/patch'))
+      drupal_set_message($t('You have <a href="!patch_manager">Patch Manger</a> installed but we could not copy the Calendar Systems required patches to files directory. Please check permissions and reinstall the module.',
+        array('!patch_manager' => url('admin/build/patch'))
       ), 'warning');
     }
   }
@@ -91,23 +68,42 @@ function calendar_systems_uninstall() {
   }
 
   // Also include module patch helpers.
-  module_load_include('inc', 'calendar_systems.patch');
+  module_load_include('patch.inc', 'calendar_systems');
 
   // Say bye to patch_manager.module.
   _calendar_systems_patches_pm_delete();
 
   // Remind about those patches, if they're still applied.
-  if (_calendar_systems_patch_applied()) {
+  if (_calendar_systems_patches_applied()) {
     drupal_set_message(t('Since you just uninstalled the Calendar Systems, you might also want to reverse the applied patch(es).'));
   }
 }
 
 /**
- * Implements hook_requirements().
+ * Implements hook_enable().
+ *
+ * Checks environments and sets appropriate messages.
  */
-function calendar_systems_requirements($phase) {
+function calendar_systems_enable() {
+  // Note user that the target files should be writable by the webserver.
+  $notice = t('Also notice that you need to make <em>patch target files</em> writable for webserver (0646) or you cannot patch them via the web interface of these modules.');
+  // Warn that the module is not usable till the she apply required patches correctly.
+  $warning = t('Even though the <a href="!link">Calendar Systems</a> module is now enabled, it is useless till you properly apply all required patches.', array(
+    '!link' => url('admin/settings/date-time/calendars')
+  ));
+
   // Include patch helpers.
-  module_load_include('inc', 'calendar_systems.patch');
-  // Return the requirements array.
-  return _calendar_systems_patches_requirements();
+  module_load_include('patch.inc', 'calendar_systems');
+
+  // Check if the required patches are applied and set the corresponding message.
+  if (_calendar_systems_patches_applied()) {
+    drupal_set_message(t('<a href="!link">Calendar Systems</a> is now successfully installed and running.',
+      array('!link' => url('admin/settings/date-time/calendars'))
+    ));
+  }
+  // Eat user head, otherwise!
+  else {
+    drupal_set_message($warning, 'warning');
+    drupal_set_message($notice,  'warning');
+  }
 }
