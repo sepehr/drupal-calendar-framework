@@ -16,7 +16,7 @@
  *   Imply whether to return all patches information or just the required ones.
  *
  * @return
- *   Either partial or full patch file info.
+ *   Either partial or full patch files info.
  *
  * @todo
  *   - Make the pool pluggable if required!
