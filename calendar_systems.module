@@ -5,11 +5,14 @@
  * Contains Calendar Systems module hooks, helpers and API functions.
  *
  * @todo
+ *   - Drush integration.
  *   - Implement alterers.
+ *   - Add Drush make file.
  *   - Add Watchdog loggings.
  *   - Implement the boring hook_help().
+ *   - Add date FAPI element integration.
  *   - Procedural and OOP API designation.
- *   - Break out the gregorian calendar implementation into its own separated module.
+ *   - Implement input validation for non-gregorian dates.
  */
 
 /**
@@ -304,7 +307,7 @@ function calendar_systems_pick() {
 }
 
 /**
- * API function to call a calendar's internal function.
+ * API function to call a calendar's internal routine.
  *
  * @param $function
  *   Function "alias" to call.
@@ -318,6 +321,9 @@ function calendar_systems_pick() {
  *
  * @retrun
  *   The returned value of called calendar function or NULL on fail.
+ *
+ * @see calendar_systems_pick()
+ * @see calendar_systems_default()
  */
 function calendar_systems_call($function, $pick = TRUE, $args = array(), $calendar = '') {
   // Cherrypick the best-fit calendar if requsted so.
