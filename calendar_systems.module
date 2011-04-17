@@ -17,7 +17,6 @@ function calendar_systems_perm() {
   );
 }
 
-
 /**
  * Implements hook_menu().
  *

@@ -163,9 +163,11 @@ function _calendar_systems_patches_pm_insert($patch_filename = FALSE, $patch_fil
     return;
   }
 
-  global $user;
   // Get all required and optional patch arrays.
   $patches = _calendar_systems_patches();
+  // Delete the previously introduced patch nodes, if any.
+  _calendar_systems_patches_pm_delete($patches);
+
   // Create and save a node per patch array.
   foreach ($patches as $identifier => $patch) {
     // Copy the patch to Drupal's files directory, This way the file
@@ -179,6 +181,7 @@ function _calendar_systems_patches_pm_insert($patch_filename = FALSE, $patch_fil
     // Oh, I wish I could automate eth!
     // chmod($patch['target'], 0646);
 
+    global $user;
     // Create and save the patch file.
     $file = (object) array(
       'file' => 1,
@@ -233,13 +236,19 @@ function _calendar_systems_patches_pm_insert($patch_filename = FALSE, $patch_fil
 /**
  * Internal helper to remove a patch_manager.module patch record.
  *
+ * @param $patches
+ *   Optional array of patches to get un-introduced!
+ *
  * @see http://drupal.org/node/292151
  * @see http://drupal.org/project/patch_manager
  */
-function _calendar_systems_patches_pm_delete() {
+function _calendar_systems_patches_pm_delete($patches = FALSE) {
   if (module_exists('patch_manager')) {
-    // Get all available patches.
-    $patches = _calendar_systems_patches();
+    // Get all available patches, if not passed.
+    if (!$patches) {
+      $patches = _calendar_systems_patches();
+    }
+
     // Delete all corresponding "patch" typed nodes.
     foreach ($patches as $identifier => $patch) {
       // Remember that we copied the patch into files directory.
