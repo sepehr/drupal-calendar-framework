@@ -194,7 +194,6 @@ function calendar_systems_calendar_form(&$form_state, $identifier) {
   exit();
 }
 
-
 /**
  * Form validation callback for a calendar administration settings form.
  */
@@ -206,14 +205,14 @@ function calendar_systems_calendar_form_validate($form, &$form_state) {
   }
 }
 
-
 /**
- * Form submission callback for a calendar administration settings.
+ * Form submission callback for a calendar administration settings form.
  */
 function calendar_systems_calendar_form_submit($form, &$form_state) {
+  // Get the passed calendar information.
   $calendar = $form_state['values']['calendar'];
 
-  // Saving necessary configs.
+  // Purging unnecessary configs.
   unset($form_state['values']['op'],
     $form_state['values']['submit'],
     $form_state['values']['form_id'],
@@ -221,24 +220,28 @@ function calendar_systems_calendar_form_submit($form, &$form_state) {
     $form_state['values']['form_token'],
     $form_state['values']['form_build_id']
   );
+  // Save the rest in a "calendar_systems_settings_{IDENTIFIER}" db variable.
   variable_set('calendar_systems_settings_' . $calendar['identifier'], $form_state['values']);
 
+  // Set a success message and redirect her
+  // to the calendar listing page after submission.
   $form_state['redirect'] = 'admin/settings/date-time/calendars';
   drupal_set_message(t('Configuration for <em>@calendar</em> has been successfully saved.',
     array('@calendar' => calendar_systems_calendar_title($calendar['identifier']))
   ));
 }
 
-
 /**
  * Theme callback for Locale language overview form.
+ *
  * It's also compatible with admin_language.module which
  * overrides the same themer callback.
  *
  * @param $form
  *   Language overview form array.
  *
- * @ingroup form_theme
+ * @return
+ *   Themed output.
  */
 function theme_calendar_systems_languages_overview_form($form) {
   // Load helpers.
