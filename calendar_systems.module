@@ -86,12 +86,13 @@ function calendar_systems_calendar_title($identifier) {
  * @see http://doques.net/node/367
  */
 function calendar_systems_patch() {
-  // Include helpers.
-  module_load_include('inc', 'calendar_systems');
+  // Include patch helpers.
+  module_load_include('patch.inc', 'calendar_systems');
 
   $patchdoq = array();
-  $patches = _calendar_systems_patch_info();
+  $patches = _calendar_systems_patches();
 
+  // Build the array required by patchdoq.module.
   foreach ($patches as $identifier => $patch) {
     $patchdoq[$identifier] = array(
       'name' => $patch['title'],
