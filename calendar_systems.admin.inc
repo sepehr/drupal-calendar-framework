@@ -21,7 +21,7 @@ function calendar_systems_calendars_form() {
   // Do not show the calendars form in case
   // that the required core patch is not yet applied.
   // TODO: Implement a requirements checker helper, etc.
-  if (!_calendar_systems_patch_applied()) {
+  if (!_calendar_systems_patches_applied()) {
     $form['calendar_systems_error'] = array(
       '#type'  => 'item',
       '#value' => t('Calendar Systems is not correctly installed. Checkout the <a href="!link">status reports</a>.', array(
@@ -108,7 +108,7 @@ function theme_calendar_systems_calendars_form($form) {
   // Include helpers.
   module_load_include('inc', 'calendar_systems');
   // Register theme callbacks only if the patch is applied.
-  if (_calendar_systems_patch_applied()) {
+  if (_calendar_systems_patches_applied()) {
     $rows = array();
     // Set form table rows.
     foreach ($form['sitewide'] as $name => $element) {
@@ -292,7 +292,7 @@ function theme_calendar_systems_languages_overview_form($form) {
   }
   // All; a waste of time!
   // TODO: Rewrite the logic and avoid this if possible.
-  if (!_calendar_systems_patch_applied()) {
+  if (!_calendar_systems_patches_applied()) {
     unset($header[7]);
     // Temporary dirt:
     foreach ($rows as $index => $row) {
