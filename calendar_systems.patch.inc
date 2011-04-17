@@ -69,50 +69,48 @@ function _calendar_systems_patches_pm_insert($patch_filename = FALSE, $patch_fil
     // can be seen by CCK filefield, sorry for the suppression load!
     $new_path = file_directory_path() . '/';
     if (!@copy($patch['path'] . $patch['name'], $new_path . $patch['name'])) {
-      $t = get_t();
-      // If there were an error in the copy process, notify the user and #fail.
-      drupal_set_message($t('You have <a href="!patchmanager">Patch Manger</a> installed but we could not copy the Calendar Systems required patches to files directory. Please check permissions and reinstall the module.',
-        array('!patchmanager' => url('admin/build/patch'))
-      ), 'warning');
+      // #FAIL.
       return FALSE;
     }
 
     // Oh, I wish I could automate eth!
-    // chmod($patch_info['target'], 0646);
+    // chmod($patch['target'], 0646);
 
-    // Create the patch file.
-    $file = new stdClass();
-    $file->list = 1;
-    $file->uid = $user->uid;
-    $file->timestamp = time();
-    $file->filename = $patch['name'];
-    $file->filesource = $patch['name'];
-    $file->filemime = file_get_mimetype($patch['name']);
-    $file->filepath = $new_path . $patch['name'];
-    $file->filesize = filesize($new_path . $patch['name']);
-    $file->status = FILE_STATUS_PERMANENT;
-
-    // Save the patch file.
+    // Create and save the patch file.
+    $file = (object) array(
+      'file' => 1,
+      'uid'  => $user->uid,
+      'timestamp' => time(),
+      'filename'  => $patch['name'],
+      'filesource' => $patch['name'],
+      'filemime' => file_get_mimetype($patch['name']),
+      'filepath' => $new_path . $patch['name'],
+      'filesize' => filesize($new_path . $patch['name']),
+      'status' => FILE_STATUS_PERMANENT,
+    );
     // Oh, missing D7 file_save().
     drupal_write_record('files', $file);
+    // Retrive the fid of the inserted file to be used in the "patch" typed node.
     $file->fid = db_result(db_query("SELECT fid FROM {files} WHERE filepath = '%s'", $file->filepath));
 
-    // Create the patch node.
-    $patch_node = new stdClass();
-    $patch_node->type = 'patch';
-    $patch_node->language = 'en';
-    $patch_node->uid = $user->uid;
-    $patch_node->title = $patch['title'];
-    $patch_node->body = $patch['description'];
-    $patch_node->field_module[0]['value'] = $patch['target module'];
+    // Build the patch node.
+    $node = new stdClass();
+    $node->type = 'patch';
+    $node->language = 'en';
+    $node->uid = $user->uid;
+    $node->title = $patch['title'];
+    $node->body = $patch['description'];
+    // CCK module field:
+    $node->field_module[0]['value'] = $patch['target module'];
+    // CCK issue number field:
     if (!is_null($patch['issue']) && is_numeric($patch['issue'])) {
-      $patch_node->field_drupal_issue[0]['value'] = $patch['issue'];
+      $node->field_drupal_issue[0]['value'] = $patch['issue'];
     }
 
     // Attach the patch file to the node.
-    $patch_node->field_patch[0] = array(
+    $node->field_patch[0] = array(
       'list' => 1,
-      'fid' => $file->fid,
+      'fid'  => $file->fid,
       'title' => $file->filename,
       'filename' => $file->filename,
       'filepath' => $file->filepath,
@@ -121,12 +119,11 @@ function _calendar_systems_patches_pm_insert($patch_filename = FALSE, $patch_fil
     );
 
     // Save the patch node.
-    content_presave($patch_node);
-    node_save($patch_node);
-    content_insert($patch_node);
+    content_presave($node);
+    node_save($node);
+    content_insert($node);
   }
-
-  // Make 'em happy!
+  // Yo Happy?
   return TRUE;
 }
 
