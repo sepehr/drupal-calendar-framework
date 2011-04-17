@@ -10,6 +10,69 @@
  */
 
 /**
+ * Internal helper which acts as a patch information pool.
+ *
+ * @param $req
+ *   Imply whether to return all patches information or just the required ones.
+ *
+ * @return
+ *   Either partial or full patch file info.
+ *
+ * @todo
+ *   - Make the pool pluggable if required!
+ */
+function _calendar_systems_patches($req = FALSE) {
+  $t = get_t();
+  $required = $optional = array();
+
+  // Required patches.
+  $required['common.inc'] = array(
+    // Relative path to target file:
+    'target' => 'includes/common.inc',
+    // Target component name:
+    'target module'  => 'core',
+    // Target component version:
+    'target version' => '6.19',
+    // The name of the patch file itself:
+    'name' => 'common.inc-format_date.d6.patch',
+    // Relative path to patch file's directory:
+    'path' => drupal_get_path('module', 'calendar_systems') . '/patches/',
+    // Patch fingerprint to check the target file contents against:
+    'fingerprint' => 'foreach (module_implements(\'format_date\') as $module)',
+    // A description of what the patch supposed to do:
+    'description' => $t('Drupal core common.inc expansion to support hook_format_date() implementations.'),
+    // Patch title:
+    'title' => $t('Calendar Systems common.inc patch for Drupal core'),
+    // Drupal.org issue number, if available:
+    'issue' => NULL,
+  );
+
+  // Optional patches.
+  $optional['uc_deliverytimeslot'] = array(
+    // Relative path to target file:
+    'target' => drupal_get_path('module', 'uc_deliverytimeslot') . '/uc_deliverytimeslot.module',
+    // Target component name:
+    'target module'  => 'uc_deliverytimeslot',
+    // Target component version:
+    'target version' => '6.x-1.0-beta4',
+    // The name of the patch file itself:
+    'name' => 'uc_deliverytimeslot-format_date.d6.patch',
+    // Relative path to patch file's directory:
+    'path' => drupal_get_path('module', 'calendar_systems') . '/patches/',
+    // Patch fingerprint to check the target file contents against:
+    'fingerprint' => '$row[] = array(\'data\' => t(\'!day\', array(\'!day\' => format_date($timestamps, \'custom\', \'l\'))),',
+    // A description of what the patch supposed to do:
+    'description' => $t('Ubercart Delivery Timeslot module to use format_date() and support for calendar_systems.module.'),
+    // Patch title:
+    'title' => $t('Calendar Systems patch for Ubercart Delivery Timeslot module'),
+    // Drupal.org issue number, if available:
+    'issue' => '970768',
+  );
+
+  return $req ? $required : $required + $optional;
+}
+
+/**
  * Internal helper to check whether the required patches are currently applied.
  *
  * @return
@@ -17,7 +80,7 @@
  */
 function _calendar_systems_patches_applied() {
   // Get required patch arrays.
-  $patches = _calendar_systems_patches_info(TRUE);
+  $patches = _calendar_systems_patches(TRUE);
 
   foreach ($patches as $identifier => $patch) {
     // Findout patch target absolute path.
@@ -35,9 +98,8 @@ function _calendar_systems_patches_applied() {
   return TRUE;
 }
 
-
 /**
- * Internal helper to create patch records for the lazy patch_manager module.
+ * Internal helper to create patch records for the lazy patch_manager project.
  *
  * Saves a "patch" typed node as per required by patch_manager.module once the
  * Calendar Systems gets installed.
@@ -62,7 +124,7 @@ function _calendar_systems_patches_pm_insert($patch_filename = FALSE, $patch_fil
 
   global $user;
   // Get all required and optional patch arrays.
-  $patches = _calendar_systems_patches_info();
+  $patches = _calendar_systems_patches();
   // Create and save a node per patch array.
   foreach ($patches as $identifier => $patch) {
     // Copy the patch to Drupal's files directory, This way the file
@@ -127,7 +189,6 @@ function _calendar_systems_patches_pm_insert($patch_filename = FALSE, $patch_fil
   return TRUE;
 }
 
-
 /**
  * Internal helper to remove a patch_manager.module patch record.
  *
@@ -140,7 +201,7 @@ function _calendar_systems_patches_pm_delete() {
   }
 
   // Get all available patches.
-  $patches = _calendar_systems_patches_info();
+  $patches = _calendar_systems_patches();
   // Delete all corresponding "patch" typed nodes.
   foreach ($patches as $identifier => $patch) {
     $path  = file_directory_path() . '/' . $patch['name'];
@@ -151,47 +212,4 @@ function _calendar_systems_patches_pm_delete() {
     $nid = db_result(db_query($query, $path));
     node_delete($nid);
   }
-}
-
-
-/**
- * Helper function to return patches information.
- *
- * @param $req
- *   Imply whether to return all patches information or just the required ones.
- *
- * @return
- *   Either partial or full patch file info.
- */
-function _calendar_systems_patch_info($req = FALSE) {
-  $t = get_t();
-  $required = $optional = array();
-
-  // Required patches.
-  $required['common.inc'] = array(
-    'target' => 'includes/common.inc',
-    'target module' => 'core',
-    'target version' => '6.19',
-    'name' => 'common.inc-format_date.d6.patch',
-    'path' => drupal_get_path('module', 'calendar_systems') . '/patch/',
-    'fingerprint' => 'foreach (module_implements(\'format_date\') as $module)',
-    'description' => $t('Drupal core common.inc expansion to support hook_format_date() implementations.'),
-    'title' => $t('Calendar Systems common.inc patch for Drupal core'),
-    'issue' => NULL,
-  );
-
-  // Optional patches.
-  $optional['uc_deliverytimeslot'] = array(
-    'target' => drupal_get_path('module', 'uc_deliverytimeslot') . '/uc_deliverytimeslot.module',
-    'target module' => 'uc_deliverytimeslot',
-    'target version' => '6.x-1.0-beta4',
-    'name' => 'uc_deliverytimeslot-format_date.d6.patch',
-    'path' => drupal_get_path('module', 'calendar_systems') . '/patch/',
-    'fingerprint' => '$row[] = array(\'data\' => t(\'!day\', array(\'!day\' => format_date($timestamps, \'custom\', \'l\'))),',
-    'description' => $t('Ubercart Delivery Timeslot module to use format_date() and support for calendar_systems.module.'),
-    'title' => $t('Calendar Systems patch for Ubercart Delivery Timeslot module'),
-    'issue' => '970768',
-  );
-
-  return $req ? $required : $required + $optional;
 }
