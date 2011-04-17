@@ -146,10 +146,11 @@ function theme_calendar_systems_calendars_form($form) {
   return drupal_render($form);
 }
 
-
 /**
- * Form callback for a calendar admin settings.
+ * Form callback for a calendar administration settings.
  *
+ * @param $form_state
+ *   Form state array.
  * @param $identifier
  *   Calendar identifier.
  *
@@ -159,17 +160,22 @@ function theme_calendar_systems_calendars_form($form) {
  * @ingroup forms
  */
 function calendar_systems_calendar_form(&$form_state, $identifier) {
+  // Get the information of the passed calendar identifier.
   $calendar = calendar_systems_calendars('calendar', $identifier);
 
+  // If the calendar is already available across the system,
+  // and it has a config callback, get its form array and render.
   if ($calendar && function_exists($calendar['config callback'])) {
+    // We pas the calendar configuration to its config callback,
+    // so it doesn't need to know about how to fetch that from db.
     $form = $calendar['config callback']($calendar['config']);
 
-    // Needed for validation and submission callbacks.
+    // Append calendar information.
     $form['calendar'] = array(
       '#type' => 'value',
       '#value' => $calendar,
     );
-
+    // And submit button.
     $form['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Save'),
@@ -183,18 +189,17 @@ function calendar_systems_calendar_form(&$form_state, $identifier) {
     return $form;
   }
 
+  // Passed calendar is not available.
   drupal_not_found();
   exit();
 }
 
 
 /**
- * Form validation callback for a calendar admin settings.
- *
- * @ingroup form_validate
+ * Form validation callback for a calendar administration settings form.
  */
 function calendar_systems_calendar_form_validate($form, &$form_state) {
-  // Pass to calendar form validator.
+  // Pass it through to the calendar configs validator.
   $function = $form_state['values']['calendar']['config callback'] . '_validate';
   if (function_exists($function)) {
     $function($form, $form_state);
@@ -203,9 +208,7 @@ function calendar_systems_calendar_form_validate($form, &$form_state) {
 
 
 /**
- * Form submission callback for a calendar admin settings.
- *
- * @ingroup form_submit
+ * Form submission callback for a calendar administration settings.
  */
 function calendar_systems_calendar_form_submit($form, &$form_state) {
   $calendar = $form_state['values']['calendar'];
