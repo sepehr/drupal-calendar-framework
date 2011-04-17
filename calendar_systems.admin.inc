@@ -99,18 +99,25 @@ function calendar_systems_calendars_form_submit($form, &$form_state) {
  *
  * @param $form
  *   Admin form array.
+ *
+ * @return
+ *   From themed output.
  */
 function theme_calendar_systems_calendars_form($form) {
-  // Include helpers.
+  // Include damn patch helpers.
   module_load_include('patch.inc', 'calendar_systems');
-  // Register theme callbacks only if the patch is applied.
+
+  // Theme the form as a table only if the
+  // required patches are already applied.
   if (_calendar_systems_patches_applied()) {
     $rows = array();
     // Set form table rows.
     foreach ($form['sitewide'] as $name => $element) {
+      // Skip if it's not a fake element.
       if (!isset($element['_id']) || !is_array($element['_id'])) {
         continue;
       }
+      // Loadup row.
       $rows[] = array(
         drupal_render($form['default_calendar'][$element['_id']['#value']]),
         check_plain($name),
