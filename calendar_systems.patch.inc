@@ -84,7 +84,7 @@ function _calendar_systems_patches_applied() {
 
   foreach ($patches as $identifier => $patch) {
     // Findout patch target absolute path.
-    // $patch['target'] should have its relative path to Drupal base.
+    // $patch['target'] should have its relative path in.
     $target = function_exists('absolute_path') ?
       absolute_path() . '/' . $patch['target'] :
       realpath(drupal_get_path('module', 'system') . '/../../' . $patch['target']);
@@ -196,20 +196,18 @@ function _calendar_systems_patches_pm_insert($patch_filename = FALSE, $patch_fil
  * @see http://drupal.org/project/patch_manager
  */
 function _calendar_systems_patches_pm_delete() {
-  if (!module_exists('patch_manager')) {
-    return;
-  }
-
-  // Get all available patches.
-  $patches = _calendar_systems_patches();
-  // Delete all corresponding "patch" typed nodes.
-  foreach ($patches as $identifier => $patch) {
-    $path  = file_directory_path() . '/' . $patch['name'];
-    $query = "SELECT ctp.nid
-              FROM {files} f
-              LEFT JOIN {content_type_patch} ctp ON f.fid = ctp.field_patch_fid
-              WHERE f.filepath = '%s'";
-    $nid = db_result(db_query($query, $path));
-    node_delete($nid);
+  if (module_exists('patch_manager')) {
+    // Get all available patches.
+    $patches = _calendar_systems_patches();
+    // Delete all corresponding "patch" typed nodes.
+    foreach ($patches as $identifier => $patch) {
+      $path  = file_directory_path() . '/' . $patch['name'];
+      $query = "SELECT ctp.nid
+                FROM {files} f
+                LEFT JOIN {content_type_patch} ctp ON f.fid = ctp.field_patch_fid
+                WHERE f.filepath = '%s'";
+      $nid = db_result(db_query($query, $path));
+      node_delete($nid);
+    }
   }
 }
