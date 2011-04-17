@@ -18,8 +18,8 @@ function calendar_systems_calendars_form() {
 
   // Include patch helpers.
   module_load_include('patch.inc', 'calendar_systems');
-  // Do not show the calendars form in case
-  // that the required core patches is not yet applied.
+  // Do not show the calendars form in case that
+  // the required core patches is not yet applied.
   if (!_calendar_systems_patches_applied()) {
     $form['calendar_systems_error'] = array(
       '#type'  => 'item',

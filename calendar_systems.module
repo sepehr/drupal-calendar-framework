@@ -2,9 +2,13 @@
 
 /**
  * @file
- * Implements necessary hooks for Calendar Systems module, plus API and helper functions.
+ * Contains Calendar Systems module hooks, helpers and API functions.
  *
  * @todo
+ *   - Implement alterers.
+ *   - Add Watchdog loggings.
+ *   - Implement the boring hook_help().
+ *   - Procedural and OOP API designation.
  *   - Break out the gregorian calendar implementation into its own separated module.
  */
 
@@ -13,7 +17,9 @@
  */
 function calendar_systems_perm() {
   return array(
+    // Authenticated users:
     'select different calendar',
+    // Administerator users:
     'administer calendar systems',
   );
 }
@@ -23,10 +29,10 @@ function calendar_systems_perm() {
  */
 function calendar_systems_menu() {
   $items = array();
-
+  // Calendars listing form.
   $items['admin/settings/date-time/calendars'] = array(
     'title' => 'Calendars',
-    'description' => 'Configuration options for available calendars.',
+    'description' => 'Configuration options for all available calendars.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('calendar_systems_calendars_form'),
     'access arguments' => array('administer calendar systems'),
@@ -34,7 +40,7 @@ function calendar_systems_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 3,
   );
-
+  // A calendar configuration form.
   $items['admin/settings/date-time/calendars/%'] = array(
     'title callback' => 'calendar_systems_calendar_title',
     'title arguments' => array(4),
@@ -52,6 +58,7 @@ function calendar_systems_menu() {
  * Implements hook_menu_alter().
  */
 function calendar_systems_menu_alter($items) {
+  // Set the date/time settings page as the default local task.
   $items['admin/settings/date-time/date-time'] = $items['admin/settings/date-time'];
   $items['admin/settings/date-time/date-time']['type'] = MENU_DEFAULT_LOCAL_TASK;
   $items['admin/settings/date-time']['type'] = MENU_NORMAL_ITEM;
@@ -77,13 +84,13 @@ function calendar_systems_calendar_title($identifier) {
  * @see http://doques.net/node/367
  */
 function calendar_systems_patch() {
-  // Include patch helpers.
+  // Include boring patch helpers.
   module_load_include('patch.inc', 'calendar_systems');
 
   $patchdoq = array();
   $patches = _calendar_systems_patches();
 
-  // Build the array required by patchdoq.module.
+  // Build the array as per required by patchdoq.
   foreach ($patches as $identifier => $patch) {
     $patchdoq[$identifier] = array(
       'name' => $patch['title'],
@@ -106,7 +113,9 @@ function calendar_systems_patch() {
  *
  * @param $timestamp
  *   Unix timestamp to be formatted.
- *   Don't worry, the proper timezone value has been added to this by format_date().
+ *   The proper timezone value has been added to this by format_date().
+ * @param $timezone
+ *   Timezone offset in seconds.
  * @param $format
  *   PHP date() function format string.
  * @param $langcode
@@ -120,83 +129,14 @@ function calendar_systems_patch() {
  * @see patch/common.inc-format_date.d6.patch
  */
 function calendar_systems_format_date($timestamp, $format, $timezone = NULL, $langcode = NULL) {
-  // Get the best-fit calendar for current
-  // user/language and call its formatter callback.
-  $calendar = _calendar_systems_select();
+  // Cherrypick the best-fit calendar for current user/language
+  // combination and call its formatter callback, if available.
+  $calendar = calendar_systems_pick();
   if (isset($calendar['format callback']) && function_exists($calendar['format callback'])) {
     return $calendar['format callback']($timestamp, $format, $timezone, $langcode, $calendar);
   }
-
+  // Unexpected failure! Falling back to format_date() itself.
   return FALSE;
-}
-
-/**
- * Implements hook_user().
- *
- * Adds user specific calendar configuration.
- */
-function calendar_systems_user($op, &$edit, &$account, $category = NULL) {
-  if ($op != 'form' || $category != 'account' || !user_access('select different calendar')) {
-    return;
-  }
-
-  $form = array();
-  $calendars = calendar_systems_calendars('names');
-
-  $form['timezone']['calendar'] = array(
-    '#type' => 'select',
-    '#title' => t('Default calendar'),
-    '#description' => t('Selecting a different calendar will change all dates across the site.'),
-    '#access' => user_access('select different calendar'),
-    '#options' => $calendars += array('default' => t('Site default calendar')),
-    '#default_value' => $account->calendar ? $account->calendar : 'default',
-  );
-
-  return $form;
-}
-
-/**
- * Implements hook_form_alter().
- *
- * Alters locale_languages_overview_form to inject calendar options.
- */
-function calendar_systems_form_alter(&$form, $form_state, $form_id) {
-  if ($form_id != 'locale_languages_overview_form') {
-    return;
-  }
-
-  // Get a list system calendar names.
-  $calendars = calendar_systems_calendars('names');
-
-  // For each language add a dropdown list,
-  // to let the user choose desired calendar.
-  $form['calendar_systems_languages'] = array(
-    '#tree' => TRUE,
-  );
-
-  foreach (array_keys($form['enabled']['#options']) as $lang) {
-    $form['calendar_systems_languages'][$lang] = array(
-      '#type' => 'select',
-      '#access' => user_access('administer calendar systems'),
-      '#options' => $calendars += array('default' => t('Default Calendar')),
-      '#default_value' => variable_get('calendar_systems_' . $lang . '_calendar', 'default'),
-    );
-  }
-
-  // Override the default themer callback.
-  $form['#theme'] = 'calendar_systems_languages_overview_form';
-
-  // And append a submission one.
-  $form['#submit'][] = 'calendar_systems_languages_overview_form_submit';
-}
-
-/**
- * Submission callback for Locale language overview form.
- */
-function calendar_systems_languages_overview_form_submit($form, &$form_state) {
-  foreach ($form_state['values']['calendar_systems_languages'] as $lang => $calendar_choice) {
-    variable_set('calendar_systems_' . $lang . '_calendar', $calendar_choice);
-  }
 }
 
 /**
@@ -216,10 +156,80 @@ function calendar_systems_theme() {
 }
 
 /**
- * API function to provide a list of all available calendars.
+ * Implements hook_user().
+ *
+ * Adds user specific calendar configuration.
+ */
+function calendar_systems_user($op, &$edit, &$account, $category = NULL) {
+  if ($op == 'form' && $category == 'account' && user_access('select different calendar')) {
+    $form = array();
+    // Get all avilable calendars names.
+    $calendars = calendar_systems_calendars('names');
+    // Add a dropdown widget under timezone
+    // fieldset, so that she can choose her fave.
+    // The value of user specific calendar will be
+    // available in $account->calendar property.
+    $form['timezone']['calendar'] = array(
+      '#type' => 'select',
+      '#title' => t('Default calendar'),
+      '#description' => t('Selecting a different calendar will change all dates across the site.'),
+      '#access' => user_access('select different calendar'),
+      '#options' => $calendars += array('default' => t('Site default calendar')),
+      '#default_value' => $account->calendar ? $account->calendar : 'default',
+    );
+    // Render.
+    return $form;
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Alters locale_languages_overview_form to inject calendar options.
+ */
+function calendar_systems_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'locale_languages_overview_form') {
+    // Get a list system calendar names.
+    $calendars = calendar_systems_calendars('names');
+
+    // For each language add a dropdown list,
+    // to let the admin choose her fave calendar.
+    $form['calendar_systems_languages'] = array(
+      '#tree' => TRUE,
+    );
+
+    foreach (array_keys($form['enabled']['#options']) as $lang) {
+      $form['calendar_systems_languages'][$lang] = array(
+        '#type' => 'select',
+        '#access' => user_access('administer calendar systems'),
+        '#options' => $calendars += array('default' => t('Default Calendar')),
+        '#default_value' => variable_get('calendar_systems_' . $lang . '_calendar', 'default'),
+      );
+    }
+
+    // Overwrite the default themer callback.
+    $form['#theme'] = 'calendar_systems_languages_overview_form';
+    // And append a submission one.
+    $form['#submit'][] = 'calendar_systems_languages_overview_form_submit';
+  }
+}
+
+/**
+ * Submission callback for Locale language overview form.
+ */
+function calendar_systems_languages_overview_form_submit($form, &$form_state) {
+  // Save the choosen calendar for a specific locale in a
+  // "calendar_systems_{LANGUAGE}_calendar" formatted db variable.
+  foreach ($form_state['values']['calendar_systems_languages'] as $lang => $calendar) {
+    variable_set('calendar_systems_' . $lang . '_calendar', $calendar);
+  }
+}
+
+/**
+ * API function to provide a list of available calendars.
  *
  * @param $op
- *   The format of return list. Could be:
+ *   The format of return list. Allowed values are:
  *   - calendar: Returns information about calendar identified by $identifier.
  *   - calendars: Returns a list of all available calendar informations.
  *   - name: Return the name of a calendar identified by $identifier.
@@ -237,19 +247,20 @@ function calendar_systems_calendars($op = 'calendars', $identifier = NULL) {
   list($calendars, $names) = _calendar_systems_build();
 
   switch ($op) {
+    // Return a array of identifier keyed calendars information.
     case 'calendars':
       return $calendars;
-
+    // Return the information about the calendar specified by $identifier.
     case 'calendar':
         return is_array($calendars[$identifier]) ?
           array_merge($calendars[$identifier], array('identifier' => $identifier)) : NULL;
-
+    // Return an array of all available calendar names.
     case 'names':
       return $names;
-
+    // Return the name of the calendar specified by $identifier.
     case 'name':
       return $names[$identifier];
-
+    // Return an array of all available calendar identifiers.
     case 'identifiers':
       return array_keys($calendars);
   }
@@ -262,41 +273,21 @@ function calendar_systems_calendars($op = 'calendars', $identifier = NULL) {
  *   An array of default calendar information.
  */
 function calendar_systems_default() {
+  // Return the system default calendar, use gregorian calendar as fallback.
   return calendar_systems_calendars('calendar', variable_get('calendar_systems_default_calendar', 'gregorian'));
 }
 
 /**
- * API function to call a calendar function.
+ * API function which selects the best-fit calendar for the environment.
  *
- * @param $function
- *   Function "alias" to call.
- * @param $args
- *   An array arguments to be passed to $function.
- * @param $calendar
- *   Calendar name to call its $function.
- *
- * @retrun
- *   The returned value od called calendar function or NULL on fail.
- */
-function calendar_systems_call($function, $args = array(), $calendar = '') {
-  $calendar = empty($calendar) ?
-    calendar_systems_default() :
-    calendar_systems_calendars('calendar', $calendar);
-
-  if (isset($calendar[$function]) && function_exists($calendar[$function])) {
-    return call_user_func_array($calendar[$function], $args);
-  }
-  return NULL;
-}
-
-/**
- * Helper function to select the proper
- * calendar based on current user and language.
+ * At the first level it checks current user calendar settings,
+ * and then the locale specific calendar settings. If there were no
+ * user/locale specific settings, the default calendar will be chosen.
  *
  * @return
  *   Calendar identifier.
  */
-function _calendar_systems_select() {
+function calendar_systems_pick() {
   global $user;
   global $language;
 
@@ -304,24 +295,53 @@ function _calendar_systems_select() {
   if (isset($user->calendar) && $user->calendar != 'default' && user_access('select different calendar')) {
     return calendar_systems_calendars('calendar', $user->calendar);
   }
-
   // Calendar per language.
   if ($calendar = variable_get('calendar_systems_' . $language->language . '_calendar', FALSE)) {
     return ($calendar == 'default') ? calendar_systems_default() : calendar_systems_calendars('calendar', $calendar);
   }
-
+  // Default calendar.
   return calendar_systems_default();
 }
 
 /**
- * Helper function to build a list of defined calendars.
+ * API function to call a calendar's internal function.
+ *
+ * @param $function
+ *   Function "alias" to call.
+ * @param $pick
+ *   Whether to cherrypick the calendar or just return the
+ *   default one in case that the $calendar is not passed.
+ * @param $args
+ *   An array of arguments to be passed to $function.
+ * @param $calendar
+ *   Calendar identifier to call its $function callback.
+ *
+ * @retrun
+ *   The returned value of called calendar function or NULL on fail.
+ */
+function calendar_systems_call($function, $pick = TRUE, $args = array(), $calendar = '') {
+  // Cherrypick the best-fit calendar if requsted so.
+  $calendar = empty($calendar) ?
+    $pick ? calendar_systems_pick() : calendar_systems_default() :
+    calendar_systems_calendars('calendar', $calendar);
+
+  // Call the calendar callback, if available.
+  if (isset($calendar[$function]) && function_exists($calendar[$function])) {
+    return call_user_func_array($calendar[$function], $args);
+  }
+
+  // Cry otherwise!
+  return NULL;
+}
+
+/**
+ * Helper function to build an array of defined calendars.
  *
  * @return
- *   An array of available calendars.
+ *   A 2D array of available calendars info and names.
  */
 function _calendar_systems_build() {
-  $names = array();
-  $calendars = array();
+  $names = $calendars = array();
 
   $calendars_defined = module_invoke_all('calendar_info');
   foreach ($calendars_defined as $identifier => $info) {
@@ -329,7 +349,7 @@ function _calendar_systems_build() {
     if (!isset($info['format callback']) || !function_exists($info['format callback'])) {
       continue;
     }
-
+    // Loadup the calendar configs.
     $info['config'] = variable_get('calendar_systems_settings_' . $identifier, '');
     $calendars[$identifier] = $info;
     $names[$identifier] = $info['name'];
@@ -339,7 +359,7 @@ function _calendar_systems_build() {
 }
 
 /**
- * API function acting as a fallback for 3rdparty calendar systems modules.
+ * API function acting as a fallback for 3rdparty Calendar Systems modules.
  *
  * Modules formatter callbacks that does not define a particular
  * format should pass the format to this API function, so the timestamp
@@ -355,7 +375,8 @@ function _calendar_systems_build() {
  * @return
  *   Formatted date based on the passed $format.
  *
- * @todo Pass it through the format_date() once it got improved.
+ * @todo
+ *   - Pass it through the format_date() once it got improved.
  */
 function calendar_systems_formatter($timestamp, $format, $timezone = 0) {
   $date = '';
