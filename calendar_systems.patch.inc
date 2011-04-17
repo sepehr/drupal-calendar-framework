@@ -113,7 +113,9 @@ function _calendar_systems_patches_requirements() {
     'value' => $t('Not installed correctly.'),
   ));
   // The message to be shown when the requirements are not met.
-  $error = $t('Calendar Systems required patches are not applied yet. Please read the installation docs.');
+  $error = $t('Calendar Systems required patches are not applied yet. Please read the <a href="!link">installation instructions</a>.',
+    array('!link' => drupal_get_path('module', 'calendar_systems') . '/INSTALL.txt')
+  );
 
   // Check if the required patches are currently applied.
   if (_calendar_systems_patches_applied()) {
