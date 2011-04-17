@@ -129,19 +129,21 @@ function _calendar_systems_patches_pm_insert($patch_filename = FALSE, $patch_fil
 
 
 /**
- * Helper function to remove patch records.
+ * Internal helper to remove a patch_manager.module patch record.
  *
  * @see http://drupal.org/node/292151
  * @see http://drupal.org/project/patch_manager
  */
-function _calendar_systems_patch_manager_delete() {
+function _calendar_systems_patches_pm_delete() {
   if (!module_exists('patch_manager')) {
     return;
   }
 
-  $patches = _calendar_systems_patch_info();
+  // Get all available patches.
+  $patches = _calendar_systems_patches_info();
+  // Delete all corresponding "patch" typed nodes.
   foreach ($patches as $identifier => $patch) {
-    $path = file_directory_path() . '/' . $patch['name'];
+    $path  = file_directory_path() . '/' . $patch['name'];
     $query = "SELECT ctp.nid
               FROM {files} f
               LEFT JOIN {content_type_patch} ctp ON f.fid = ctp.field_patch_fid
