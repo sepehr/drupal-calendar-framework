@@ -2,7 +2,11 @@
 
 /**
  * @file
- * A collection of Calendar Systems internal helpers around its compatibility patches.
+ * A collection of internal helpers around the compatibility patches.
+ *
+ * @todo
+ *   - Break out the patch wrapper code into its own separate module, so we can
+ *     focus on the real Calendar Systems module.
  */
 
 /**
@@ -17,7 +21,7 @@ function _calendar_systems_patches_applied() {
 
   foreach ($patches as $identifier => $patch) {
     // Findout patch target absolute path.
-    // $patch['target'] should have its realative path to Drupal base.
+    // $patch['target'] should have its relative path to Drupal base.
     $target = function_exists('absolute_path') ?
       absolute_path() . '/' . $patch['target'] :
       realpath(drupal_get_path('module', 'system') . '/../../' . $patch['target']);
@@ -33,36 +37,43 @@ function _calendar_systems_patches_applied() {
 
 
 /**
- * Helper function to create patch records
- * for patch_manager.module once the module gets installed.
+ * Internal helper to create patch records for the lazy patch_manager module.
+ *
+ * Saves a "patch" typed node as per required by patch_manager.module once the
+ * Calendar Systems gets installed.
  *
  * @param $patch_filename
  *   The name of the patch file.
  * @param $patch_filepath
- *   The relative path of patch file.
+ *   The relative path to the patch file.
+ *
+ * @return
+ *   Boolean value indicating the process result.
  *
  * @see http://drupal.org/project/patch_manager
- * @todo Watch for duplicate patch introductions!
+ *
+ * @todo
+ *   - Watch for duplicate patch introductions!
  */
-function _calendar_systems_patch_manager_insert($patch_filename = FALSE, $patch_filepath = FALSE) {
+function _calendar_systems_patches_pm_insert($patch_filename = FALSE, $patch_filepath = FALSE) {
   if (!module_exists('patch_manager')) {
     return;
   }
 
   global $user;
-  $patches = _calendar_systems_patch_info();
-
+  // Get all required and optional patch arrays.
+  $patches = _calendar_systems_patches_info();
+  // Create and save a node per patch array.
   foreach ($patches as $identifier => $patch) {
-    // Copy the patch to Drupal files directory,
-    // This way the file could be seen by CCK
-    // filefield. Sorry for the suppression load!
+    // Copy the patch to Drupal's files directory, This way the file
+    // can be seen by CCK filefield, sorry for the suppression load!
     $new_path = file_directory_path() . '/';
     if (!@copy($patch['path'] . $patch['name'], $new_path . $patch['name'])) {
       $t = get_t();
-      drupal_set_message($t('You have <a href="!patchmanager">Patch Manger</a> installed but we could not copy the Calendar Systems patch to files directory. Please check directory permissions and reinstall the module.',
+      // If there were an error in the copy process, notify the user and #fail.
+      drupal_set_message($t('You have <a href="!patchmanager">Patch Manger</a> installed but we could not copy the Calendar Systems required patches to files directory. Please check permissions and reinstall the module.',
         array('!patchmanager' => url('admin/build/patch'))
       ), 'warning');
-
       return FALSE;
     }
 
@@ -70,7 +81,6 @@ function _calendar_systems_patch_manager_insert($patch_filename = FALSE, $patch_
     // chmod($patch_info['target'], 0646);
 
     // Create the patch file.
-    // TODO: Check for duplicates.
     $file = new stdClass();
     $file->list = 1;
     $file->uid = $user->uid;
