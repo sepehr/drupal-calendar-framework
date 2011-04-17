@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Implementation of Calendar Systems un/installation hooks.
+ * Implementation of Calendar Systems requirements and un/installation hooks.
  */
 
 /**
@@ -10,7 +10,7 @@
  */
 function calendar_systems_enable() {
   // Include helpers.
-  module_load_include('inc', 'calendar_systems');
+  module_load_include('inc', 'calendar_systems.patch');
 
   // I know, I'm talking too much!
   $notice = t('Also notice that you need to make <em>patch target files</em> writable for webserver (0646) or you cannot patch them via the web interface of these modules.');
@@ -45,7 +45,7 @@ function calendar_systems_enable() {
 function calendar_systems_install() {
   if (module_exists('patch_manager')) {
     // Include helpers.
-    module_load_include('inc', 'calendar_systems');
+    module_load_include('inc', 'calendar_systems.patch');
 
     // Get proper translator function.
     $t = get_t();
@@ -81,7 +81,7 @@ function calendar_systems_uninstall() {
   drupal_load('module', 'calendar_systems');
 
   // Also include module helpers.
-  module_load_include('inc', 'calendar_systems');
+  module_load_include('inc', 'calendar_systems.patch');
 
   // Remove all calendars settings.
   $calendars = calendar_systems_calendars();
@@ -107,7 +107,7 @@ function calendar_systems_requirements($phase) {
   global $base_url;
 
   // Include helpers.
-  module_load_include('inc', 'calendar_systems');
+  module_load_include('inc', 'calendar_systems.patch');
 
   $t = get_t();
   $patch_info = _calendar_systems_patch_info(TRUE);
