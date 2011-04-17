@@ -303,5 +303,7 @@ function theme_calendar_systems_languages_overview_form($form) {
   // Let it go!
   $output = theme('table', $header, $rows);
   $output .= drupal_render($form);
-  return $output;
+  return $output . t('<a href="!link">Configure default calendar</a>', array(
+    '!link' => url('admin/settings/date-time/calendars'),
+  ));
 }
