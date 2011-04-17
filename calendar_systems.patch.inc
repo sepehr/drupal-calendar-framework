@@ -2,33 +2,25 @@
 
 /**
  * @file
- * Calendar Systems helper functions which need to be used in various module files.
+ * A collection of Calendar Systems internal helpers around its compatibility patches.
  */
 
 /**
- * Helper function to check whether the patch
- * is applied to the patch target file or not.
+ * Internal helper to check whether the required patches are currently applied.
  *
  * @return
- *   Boolean value.
- *
- * @todo Check whether the runkit extension is loaded to do a dirty magic.
+ *   TRUE if all required patches are applies, FALSE otherwise.
  */
-function _calendar_systems_patch_applied() {
-  $patches = _calendar_systems_patch_info(TRUE);
+function _calendar_systems_patches_applied() {
+  // Get required patch arrays.
+  $patches = _calendar_systems_patches_info(TRUE);
 
   foreach ($patches as $identifier => $patch) {
-    // Patch target relative path to Drupal base.
-    $relative_path = $patch['target'];
-
-    // Patch target absolute path.
-    if (module_exists('absolute_path')) {
-      global $absolute_path;
-      $target = $absolute_path . '/' . $relative_path;
-    }
-    else {
-      $target = realpath(drupal_get_path('module', 'system') . '/../../' . $relative_path);
-    }
+    // Findout patch target absolute path.
+    // $patch['target'] should have its realative path to Drupal base.
+    $target = function_exists('absolute_path') ?
+      absolute_path() . '/' . $patch['target'] :
+      realpath(drupal_get_path('module', 'system') . '/../../' . $patch['target']);
 
     // Applied?
     if (strpos(file_get_contents($target), $patch['fingerprint']) === FALSE) {
