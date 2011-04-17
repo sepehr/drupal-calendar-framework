@@ -3,6 +3,9 @@
 /**
  * @file
  * Implements necessary hooks for Calendar Systems module, plus API and helper functions.
+ *
+ * @todo
+ *   - Break out the gregorian calendar implementation into its own separated module.
  */
 
 /**
@@ -45,7 +48,6 @@ function calendar_systems_menu() {
   return $items;
 }
 
-
 /**
  * Implements hook_menu_alter().
  */
@@ -54,7 +56,6 @@ function calendar_systems_menu_alter($items) {
   $items['admin/settings/date-time/date-time']['type'] = MENU_DEFAULT_LOCAL_TASK;
   $items['admin/settings/date-time']['type'] = MENU_NORMAL_ITEM;
 }
-
 
 /**
  * Calendar menu title callback.
@@ -68,7 +69,6 @@ function calendar_systems_menu_alter($items) {
 function calendar_systems_calendar_title($identifier) {
   return sprintf('%s Calendar', calendar_systems_calendars('name', $identifier));
 }
-
 
 /**
  * Implements hook_patch().
@@ -95,7 +95,6 @@ function calendar_systems_patch() {
 
   return $patchdoq;
 }
-
 
 /**
  * Implements hook_format_date().
@@ -131,7 +130,6 @@ function calendar_systems_format_date($timestamp, $format, $timezone = NULL, $la
   return FALSE;
 }
 
-
 /**
  * Implements hook_user().
  *
@@ -156,7 +154,6 @@ function calendar_systems_user($op, &$edit, &$account, $category = NULL) {
 
   return $form;
 }
-
 
 /**
  * Implements hook_form_alter().
@@ -193,7 +190,6 @@ function calendar_systems_form_alter(&$form, $form_state, $form_id) {
   $form['#submit'][] = 'calendar_systems_languages_overview_form_submit';
 }
 
-
 /**
  * Submission callback for Locale language overview form.
  */
@@ -202,7 +198,6 @@ function calendar_systems_languages_overview_form_submit($form, &$form_state) {
     variable_set('calendar_systems_' . $lang . '_calendar', $calendar_choice);
   }
 }
-
 
 /**
  * Implements hook_theme().
@@ -219,7 +214,6 @@ function calendar_systems_theme() {
     ),
   );
 }
-
 
 /**
  * API function to provide a list of all available calendars.
@@ -261,7 +255,6 @@ function calendar_systems_calendars($op = 'calendars', $identifier = NULL) {
   }
 }
 
-
 /**
  * API function to get current default calendar.
  *
@@ -271,7 +264,6 @@ function calendar_systems_calendars($op = 'calendars', $identifier = NULL) {
 function calendar_systems_default() {
   return calendar_systems_calendars('calendar', variable_get('calendar_systems_default_calendar', 'gregorian'));
 }
-
 
 /**
  * API function to call a calendar function.
@@ -297,7 +289,6 @@ function calendar_systems_call($function, $args = array(), $calendar = '') {
   return NULL;
 }
 
-
 /**
  * Helper function to select the proper
  * calendar based on current user and language.
@@ -321,7 +312,6 @@ function _calendar_systems_select() {
 
   return calendar_systems_default();
 }
-
 
 /**
  * Helper function to build a list of defined calendars.
@@ -347,7 +337,6 @@ function _calendar_systems_build() {
 
   return array($calendars, $names);
 }
-
 
 /**
  * API function acting as a fallback for 3rdparty calendar systems modules.
@@ -403,7 +392,6 @@ function calendar_systems_formatter($timestamp, $format, $timezone = 0) {
   return $date;
 }
 
-
 /**
  * Implements hook_calendar_info().
  *
@@ -424,7 +412,6 @@ function calendar_systems_calendar_info() {
 
   return $calendar;
 }
-
 
 /**
  * Gregorian calendar (fake) date formatter callback.
@@ -450,7 +437,6 @@ function calendar_systems_calendar_info() {
 function calendar_gregorian_formatter($timestamp, $type, $format, $langcode, $calendar) {
   return FALSE;
 }
-
 
 /**
  * Calendar month days helper. Also acts as a fallback
