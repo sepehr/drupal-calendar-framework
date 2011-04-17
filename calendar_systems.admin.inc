@@ -84,27 +84,21 @@ function calendar_systems_calendars_form() {
   return $form;
 }
 
-
 /**
- * Form submission callback.
- *
- * @ingroup form_submit
+ * Form submission callback for calendars listing form.
  */
 function calendar_systems_calendars_form_submit($form, &$form_state) {
   if ($form_state['values']['default_calendar']) {
     variable_set('calendar_systems_default_calendar', $form_state['values']['default_calendar']);
-    drupal_set_message(t('System default calendar has been updated.'));
+    drupal_set_message(t('System default calendar has been successfully updated.'));
   }
 }
 
-
 /**
- * Theme callback for Calendar Systems admin form.
+ * Theme callback for calendars listing form.
  *
  * @param $form
  *   Admin form array.
- *
- * @ingroup form_theme
  */
 function theme_calendar_systems_calendars_form($form) {
   // Include helpers.
