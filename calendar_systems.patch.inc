@@ -242,13 +242,16 @@ function _calendar_systems_patches_pm_delete() {
     $patches = _calendar_systems_patches();
     // Delete all corresponding "patch" typed nodes.
     foreach ($patches as $identifier => $patch) {
+      // Remember that we copied the patch into files directory.
       $path  = file_directory_path() . '/' . $patch['name'];
       $query = "SELECT ctp.nid
                 FROM {files} f
                 LEFT JOIN {content_type_patch} ctp ON f.fid = ctp.field_patch_fid
                 WHERE f.filepath = '%s'";
-      $nid = db_result(db_query($query, $path));
-      node_delete($nid);
+      // Delete patch's corresponding node, if any.
+      if (($nid = db_result(db_query($query, $path)))) {
+        node_delete($nid);
+      }
     }
   }
 }
