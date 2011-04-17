@@ -262,7 +262,7 @@ function theme_calendar_systems_languages_overview_form($form) {
       $form['enabled'][$name]['#attributes']['disabled'] = 'disabled';
     }
 
-    // Set form table header.
+    // Loadup rows.
     $rows[] = array(
       array(
         'align' => 'center',
@@ -299,8 +299,14 @@ function theme_calendar_systems_languages_overview_form($form) {
     unset($header[6]);
     $rows = array_map('array_filter', $rows);
   }
-  // All; a waste of time!
-  // TODO: Rewrite the logic and avoid this if possible.
+
+  // Required patches are not applied at the moment,
+  // all was a waste of time! We're checking the patch
+  // application here, it's also OK to do so in the
+  // implementation of hook_theme(). But that way the
+  // form will be unfunctional in case that the required
+  // patches are reverted and the theme cache is not yet
+  // rebuilt.
   if (!_calendar_systems_patches_applied()) {
     unset($header[7]);
     // Temporary dirt:
@@ -312,6 +318,7 @@ function theme_calendar_systems_languages_overview_form($form) {
   // Let it go!
   $output = theme('table', $header, $rows);
   $output .= drupal_render($form);
+  // Also add a link to default calendar configuration page.
   return $output . t('<a href="!link">Configure default calendar</a>', array(
     '!link' => url('admin/settings/date-time/calendars'),
   ));
