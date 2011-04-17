@@ -17,7 +17,7 @@ function calendar_systems_calendars_form() {
   $form = array();
 
   // Include helpers.
-  module_load_include('inc', 'calendar_systems');
+  module_load_include('patch.inc', 'calendar_systems');
   // Do not show the calendars form in case
   // that the required core patch is not yet applied.
   // TODO: Implement a requirements checker helper, etc.
@@ -106,7 +106,7 @@ function calendar_systems_calendars_form_submit($form, &$form_state) {
  */
 function theme_calendar_systems_calendars_form($form) {
   // Include helpers.
-  module_load_include('inc', 'calendar_systems');
+  module_load_include('patch.inc', 'calendar_systems');
   // Register theme callbacks only if the patch is applied.
   if (_calendar_systems_patches_applied()) {
     $rows = array();
@@ -236,7 +236,7 @@ function calendar_systems_calendar_form_submit($form, &$form_state) {
  */
 function theme_calendar_systems_languages_overview_form($form) {
   // Load helpers.
-  module_load_include('inc', 'calendar_systems');
+  module_load_include('patch.inc', 'calendar_systems');
 
   $rows = array();
   $default = language_default();
