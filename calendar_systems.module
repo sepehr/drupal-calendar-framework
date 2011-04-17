@@ -7,8 +7,6 @@
 
 /**
  * Implements hook_perm().
- *
- * @ingroup hook_implementation
  */
 function calendar_systems_perm() {
   return array(
@@ -19,8 +17,6 @@ function calendar_systems_perm() {
 
 /**
  * Implements hook_menu().
- *
- * @ingroup hook_implementation
  */
 function calendar_systems_menu() {
   $items = array();
@@ -68,8 +64,6 @@ function calendar_systems_menu_alter($items) {
  *
  * @return
  *   Calendar menu title.
- *
- * @ingroup title_callback
  */
 function calendar_systems_calendar_title($identifier) {
   return sprintf('%s Calendar', calendar_systems_calendars('name', $identifier));
@@ -78,8 +72,6 @@ function calendar_systems_calendar_title($identifier) {
 
 /**
  * Implements hook_patch().
- *
- * @ingroup hook_implementation
  *
  * @see http://drupal.org/project/patchdoq
  * @see http://doques.net/node/367
@@ -124,8 +116,6 @@ function calendar_systems_patch() {
  * @return
  *   The formatted date or FALSE otherwise.
  *
- * @ingroup hook_implementation
- *
  * @see format_date()
  * @see calendar_systems_patch()
  * @see patch/common.inc-format_date.d6.patch
@@ -146,8 +136,6 @@ function calendar_systems_format_date($timestamp, $format, $timezone = NULL, $la
  * Implements hook_user().
  *
  * Adds user specific calendar configuration.
- *
- * @ingroup hook_implementation
  */
 function calendar_systems_user($op, &$edit, &$account, $category = NULL) {
   if ($op != 'form' || $category != 'account' || !user_access('select different calendar')) {
@@ -174,8 +162,6 @@ function calendar_systems_user($op, &$edit, &$account, $category = NULL) {
  * Implements hook_form_alter().
  *
  * Alters locale_languages_overview_form to inject calendar options.
- *
- * @ingroup hook_implementation
  */
 function calendar_systems_form_alter(&$form, $form_state, $form_id) {
   if ($form_id != 'locale_languages_overview_form') {
@@ -210,8 +196,6 @@ function calendar_systems_form_alter(&$form, $form_state, $form_id) {
 
 /**
  * Submission callback for Locale language overview form.
- *
- * @ingroup form_submit
  */
 function calendar_systems_languages_overview_form_submit($form, &$form_state) {
   foreach ($form_state['values']['calendar_systems_languages'] as $lang => $calendar_choice) {
@@ -222,8 +206,6 @@ function calendar_systems_languages_overview_form_submit($form, &$form_state) {
 
 /**
  * Implements hook_theme().
- *
- * @ingroup hook_implementation
  */
 function calendar_systems_theme() {
   return array(
@@ -255,8 +237,6 @@ function calendar_systems_theme() {
  * @return
  *   An array of calendars or a single calendar.
  *
- * @ingroup module_api
- *
  * @see _calendar_systems_build()
  */
 function calendar_systems_calendars($op = 'calendars', $identifier = NULL) {
@@ -287,8 +267,6 @@ function calendar_systems_calendars($op = 'calendars', $identifier = NULL) {
  *
  * @return
  *   An array of default calendar information.
- *
- * @ingroup module_api
  */
 function calendar_systems_default() {
   return calendar_systems_calendars('calendar', variable_get('calendar_systems_default_calendar', 'gregorian'));
@@ -307,8 +285,6 @@ function calendar_systems_default() {
  *
  * @retrun
  *   The returned value od called calendar function or NULL on fail.
- *
- * @ingroup module_api
  */
 function calendar_systems_call($function, $args = array(), $calendar = '') {
   $calendar = empty($calendar) ?
@@ -328,8 +304,6 @@ function calendar_systems_call($function, $args = array(), $calendar = '') {
  *
  * @return
  *   Calendar identifier.
- *
- * @ingroup module_helper
  */
 function _calendar_systems_select() {
   global $user;
@@ -354,8 +328,6 @@ function _calendar_systems_select() {
  *
  * @return
  *   An array of available calendars.
- *
- * @ingroup module_helper
  */
 function _calendar_systems_build() {
   $names = array();
@@ -393,8 +365,6 @@ function _calendar_systems_build() {
  *
  * @return
  *   Formatted date based on the passed $format.
- *
- * @ingroup module_api
  *
  * @todo Pass it through the format_date() once it got improved.
  */
@@ -442,8 +412,6 @@ function calendar_systems_formatter($timestamp, $format, $timezone = 0) {
  *
  * @return
  *   An array of Gregorian calendar information.
- *
- * @ingroup hook_implementation
  */
 function calendar_systems_calendar_info() {
   $calendar = array();
@@ -478,8 +446,6 @@ function calendar_systems_calendar_info() {
  *   The formatted date or FALSE otherwise.
  *
  * @see format_date()
- *
- * @ingroup calendar_format_callback
  */
 function calendar_gregorian_formatter($timestamp, $type, $format, $langcode, $calendar) {
   return FALSE;
@@ -493,8 +459,6 @@ function calendar_gregorian_formatter($timestamp, $type, $format, $langcode, $ca
  * @return
  *   An array of ordered numbers corresponding
  *   to a Gregorian year monthes length of days.
- *
- * @ingroup calendar_helper
  */
 function calendar_gregorian_month_days() {
   return array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
