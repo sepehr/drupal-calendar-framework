@@ -13,6 +13,11 @@
  *   - Add date FAPI element integration.
  *   - Procedural and OOP API designation.
  *   - Implement input validation for non-gregorian dates.
+ *   - All calnedar internal callbacks should be invoked
+ *     using calendar_systems_call() API.
+ *   - Allow submodules to define their callbacks in their
+ *     desired path, and set the path in their implementation of
+ *     hook_calendar_info();
  */
 
 /**
